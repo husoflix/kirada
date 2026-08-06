@@ -421,3 +421,25 @@ button:hover { opacity: 0.8; }
     color: #fff;
     transform: translateY(-2px);
 }
+/* Mobil Uyumlu Tasarım Ayarları */
+@media screen and (max-width: 768px) {
+    /* Ana yerleşimi alt alta kayacak şekilde ayarla */
+    body {
+        flex-direction: column;
+    }
+
+    /* Sol menüyü mobilde tam genişlik veya üst menü haline getir */
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+        box-shadow: none !important;
+    }
+
+    /* İçerik alanının menünün altında kalmasını sağla */
+    .main-content, .dashboard-section, main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 15px !important;
+    }
+}
