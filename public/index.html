@@ -17,11 +17,21 @@
                 <i class="fa-solid fa-car-side"></i>
                 <h2 style="margin-left: 10px;">kirada</h2>
             </div>
-            <h2 style="font-size: 20px; margin-bottom: 25px;">Lütfen Kullanıcı Seçin</h2>
+            <h2 style="font-size: 20px; margin-bottom: 20px;">Lütfen Kullanıcı Seçin</h2>
+            
             <div class="user-buttons">
-                <button onclick="loginUser('GÜVEN AKBULUT')">GÜVEN AKBULUT</button>
-                <button onclick="loginUser('EGEMEN AKBULUT')">EGEMEN AKBULUT</button>
-                <button onclick="loginUser('ANIL ŞEKER')">ANIL ŞEKER</button>
+                <button onclick="handleUserClick('GÜVEN AKBULUT')">GÜVEN AKBULUT</button>
+                <button onclick="handleUserClick('ANIL ŞEKER')">ANIL ŞEKER</button>
+                <button onclick="handleUserClick('EGEMEN AKBULUT')">EGEMEN AKBULUT (Yönetici)</button>
+            </div>
+
+            <!-- Egemen İçin Şifre Alanı (Gizli Başlar) -->
+            <div id="password-container" style="display: none; margin-top: 20px;">
+                <div class="input-group" style="text-align: left;">
+                    <label>Yönetici Şifresi</label>
+                    <input type="password" id="admin-password" placeholder="Şifrenizi girin">
+                </div>
+                <button class="btn-primary" onclick="verifyAdminPassword()" style="margin-top: 10px;">Giriş Yap</button>
             </div>
         </div>
     </div>
@@ -44,7 +54,8 @@
                 <ul class="nav-links">
                     <li id="nav-dashboard" class="active"><i class="fa-solid fa-house"></i> Gösterge Paneli</li>
                     <li id="nav-revenue"><i class="fa-solid fa-wallet"></i> Aylık Tahsilat</li>
-                    <li id="add-car-btn"><i class="fa-solid fa-plus"></i> Yeni Araç Ekle</li>
+                    <!-- Sadece Yöneticiye Gözükecek Buton -->
+                    <li id="nav-add-car" style="display: none;"><i class="fa-solid fa-plus"></i> Yeni Araç Ekle</li>
                 </ul>
                 <ul class="logout-link">
                     <li id="logout-btn" style="color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Kullanıcı Değiştir</li>
@@ -73,7 +84,6 @@
             <div id="revenue-section" style="display: none;">
                 <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <h1>Aylık Tahsilat Geçmişi</h1>
-                    <!-- Excel İndir Butonu Eklendi -->
                     <button id="export-excel-btn" class="btn-success" style="width: auto; padding: 10px 20px;">
                         <i class="fa-solid fa-file-excel"></i> Excel'e Aktar
                     </button>

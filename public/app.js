@@ -1,7 +1,11 @@
-// Başlangıç değişkenleri (Dizi ve nesne garantili)
+// Başlangıç değişkenleri
 let cars = [];
 let revenueData = {};
 let currentUser = localStorage.getItem('rentACarUser') || null; 
+let isAdmin = localStorage.getItem('rentACarIsAdmin') === 'true';
+
+// Yönetici şifresi güncellendi
+const ADMIN_PASSWORD = "egemen123"; 
 
 // DOM Elementleri
 const carsContainer = document.getElementById('cars-container');
@@ -10,25 +14,22 @@ const rentedCarsEl = document.getElementById('rented-cars');
 const dashboardSection = document.getElementById('dashboard-section');
 const revenueSection = document.getElementById('revenue-section');
 
-// Modallar
 const addModal = document.getElementById('add-car-modal');
 const rentModal = document.getElementById('rent-car-modal');
 const returnModal = document.getElementById('return-car-modal');
 const editKmModal = document.getElementById('edit-km-modal'); 
 
-// 1. Verileri Turso Veritabanından (Backend üzerinden) Çek
+// 1. Verileri Turso Veritabanından Çek
 async function loadDataFromDB() {
     try {
         const carsRes = await fetch('/api/cars');
         const carsData = await carsRes.json();
-        // Gelen veri dizi değilse boş dizi ata (Hata önleyici)
         cars = Array.isArray(carsData) ? carsData : [];
 
         const revRes = await fetch('/api/revenue');
         const revData = await revRes.json();
         revenueData = (revData && typeof revData === 'object') ? revData : {};
 
-        // Veriler geldikten sonra uygulamayı başlat
         initApp();
     } catch (err) {
         console.error("Veriler yüklenirken hata oluştu:", err);
@@ -38,13 +39,18 @@ async function loadDataFromDB() {
     }
 }
 
-// Uygulama Başlatıcı
 function initApp() {
     if (!currentUser) {
         document.getElementById('login-screen').style.display = 'flex';
     } else {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('logged-in-user').innerText = currentUser;
+        
+        if (isAdmin) {
+            document.getElementById('nav-add-car').style.display = 'block';
+        } else {
+            document.getElementById('nav-add-car').style.display = 'none';
+        }
     }
 
     renderCars();
@@ -52,21 +58,47 @@ function initApp() {
     renderRevenue();
 }
 
-// --- GİRİŞ / ÇIKIŞ İŞLEMLERİ ---
-window.loginUser = function(userName) {
+// --- GİRİŞ / YETKİLENDİRME İŞLEMLERİ ---
+window.handleUserClick = function(userName) {
+    if (userName === 'EGEMEN AKBULUT') {
+        document.getElementById('password-container').style.display = 'block';
+    } else {
+        loginUser(userName, false);
+    }
+};
+
+window.verifyAdminPassword = function() {
+    const enteredPass = document.getElementById('admin-password').value;
+    if (enteredPass === ADMIN_PASSWORD) {
+        loginUser('EGEMEN AKBULUT', true);
+    } else {
+        alert("Hatalı şifre!");
+    }
+};
+
+function loginUser(userName, adminStatus) {
     currentUser = userName;
+    isAdmin = adminStatus;
     localStorage.setItem('rentACarUser', userName); 
+    localStorage.setItem('rentACarIsAdmin', adminStatus); 
+
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('logged-in-user').innerText = currentUser;
-};
+    document.getElementById('password-container').style.display = 'none';
+    document.getElementById('admin-password').value = '';
+
+    initApp();
+}
 
 document.getElementById('logout-btn').addEventListener('click', () => {
     currentUser = null;
+    isAdmin = false;
     localStorage.removeItem('rentACarUser'); 
+    localStorage.removeItem('rentACarIsAdmin'); 
     document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('password-container').style.display = 'none';
 });
 
-// 2. Verileri Turso Veritabanına (Backend üzerinden) Kaydet
 async function saveData() {
     try {
         await fetch('/api/cars/save', {
@@ -105,7 +137,6 @@ document.getElementById('nav-revenue').addEventListener('click', (e) => {
     renderRevenue();
 });
 
-// Araçları Ekrana Çiz
 function renderCars() {
     carsContainer.innerHTML = '';
     cars.forEach(car => {
@@ -124,11 +155,14 @@ function renderCars() {
             `;
         }
 
-        let editKmIcon = isAvailable 
+        let editKmIcon = (isAvailable && isAdmin)
             ? `<i class="fa-solid fa-pen edit-icon" onclick="openEditKmModal('${car.id}')" title="KM Düzenle"></i>` 
             : '';
 
         let displayPlate = car.plate ? car.plate : 'PLAKA YOK';
+        let deleteButtonHtml = isAdmin 
+            ? `<button class="btn-danger" onclick="deleteCar('${car.id}')"><i class="fa-solid fa-trash"></i></button>` 
+            : '';
 
         card.innerHTML = `
             <div class="car-header">
@@ -149,20 +183,18 @@ function renderCars() {
                     ? `<button class="btn-success" onclick="openRentModal('${car.id}')">Kirala</button>`
                     : `<button class="btn-warning" onclick="openReturnModal('${car.id}')">Teslim Al</button>`
                 }
-                <button class="btn-danger" onclick="deleteCar('${car.id}')"><i class="fa-solid fa-trash"></i></button>
+                ${deleteButtonHtml}
             </div>
         `;
         carsContainer.appendChild(card);
     });
 }
 
-// İstatistikleri Güncelle
 function updateStats() {
     totalCarsEl.innerText = cars.length;
     rentedCarsEl.innerText = cars.filter(c => c.status === 'rented').length;
 }
 
-// Aylık Tahsilatları Ekrana Çiz
 function renderRevenue() {
     const container = document.getElementById('revenue-container');
     container.innerHTML = '';
@@ -184,17 +216,24 @@ function renderRevenue() {
 
         let detailsHtml = '';
         if (monthData.details && monthData.details.length > 0) {
-            monthData.details.forEach(detail => {
-                
+            monthData.details.forEach((detail, index) => {
                 let employeeText = detail.employee ? `Personel: ${detail.employee}, ` : '';
+                let extraKmText = detail.extraKmCost ? ` (Aşan KM Ücreti: ${detail.extraKmCost} ₺)` : '';
+                
+                let deleteRevBtn = isAdmin 
+                    ? `<button onclick="deleteRevenueItem('${key}', ${index})" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-left:10px;" title="Kaydı Sil"><i class="fa-solid fa-trash"></i></button>`
+                    : '';
 
                 detailsHtml += `
-                    <div class="revenue-detail-item">
+                    <div class="revenue-detail-item" style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="car-info">
                             <i class="fa-solid fa-car"></i> <span>${detail.carName}</span>
-                            (Müşteri: ${detail.renter}, ${employeeText}${detail.days} Gün)
+                            (Müşteri: ${detail.renter}, ${employeeText}${detail.days} Gün)${extraKmText}
                         </div>
-                        <div class="car-income">${detail.amount.toLocaleString('tr-TR')} ₺</div>
+                        <div style="display: flex; align-items: center;">
+                            <div class="car-income">${detail.amount.toLocaleString('tr-TR')} ₺</div>
+                            ${deleteRevBtn}
+                        </div>
                     </div>
                 `;
             });
@@ -218,12 +257,18 @@ function renderRevenue() {
     container.innerHTML = htmlContent;
 }
 
-// --- ARAÇ EKLEME İŞLEMLERİ ---
-document.getElementById('add-car-btn').addEventListener('click', () => addModal.style.display = 'flex');
+// --- ARAÇ EKLEME ---
+const navAddCarBtn = document.getElementById('nav-add-car');
+if (navAddCarBtn) {
+    navAddCarBtn.addEventListener('click', () => {
+        if (isAdmin) addModal.style.display = 'flex';
+    });
+}
 document.getElementById('close-add-modal').addEventListener('click', () => addModal.style.display = 'none');
 
 document.getElementById('add-car-form').addEventListener('submit', (e) => {
     e.preventDefault();
+    if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     
     let rawPlate = document.getElementById('car-plate').value;
     let upperPlate = rawPlate.toLocaleUpperCase('tr-TR');
@@ -248,30 +293,24 @@ document.getElementById('add-car-form').addEventListener('submit', (e) => {
     e.target.reset();
 });
 
-// --- KM DÜZENLEME İŞLEMLERİ ---
+// --- KM DÜZENLEME ---
 document.getElementById('close-edit-km-modal').addEventListener('click', () => editKmModal.style.display = 'none');
 
 function openEditKmModal(id) {
+    if (!isAdmin) return;
     const car = cars.find(c => c.id === id);
     document.getElementById('edit-km-car-id').value = id;
     document.getElementById('new-km-input').value = car.km; 
-    
     editKmModal.style.display = 'flex';
 }
 
 document.getElementById('edit-km-form').addEventListener('submit', (e) => {
     e.preventDefault();
+    if (!isAdmin) return;
     const id = document.getElementById('edit-km-car-id').value;
     const newKm = parseInt(document.getElementById('new-km-input').value);
     
     const carIndex = cars.findIndex(c => c.id === id);
-    
-    if(newKm < cars[carIndex].km) {
-        if(!confirm("Girdiğiniz yeni KM, eski değerden düşük! Yine de değiştirmek istediğinize emin misiniz?")) {
-            return;
-        }
-    }
-    
     cars[carIndex].km = newKm;
     saveData();
     editKmModal.style.display = 'none';
@@ -284,9 +323,7 @@ function openRentModal(id) {
     document.getElementById('rent-km').value = car.km; 
     document.getElementById('renter-name').value = ''; 
     document.getElementById('daily-price').value = ''; 
-    
     document.getElementById('employee-name').value = currentUser;
-    
     document.getElementById('rent-date').valueAsDate = new Date(); 
     
     let tomorrow = new Date();
@@ -300,14 +337,13 @@ document.getElementById('close-rent-modal').addEventListener('click', () => rent
 document.getElementById('rent-car-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('rent-car-id').value;
-    
     const carIndex = cars.findIndex(c => c.id === id);
+
     cars[carIndex].status = 'rented';
     cars[carIndex].rentDate = document.getElementById('rent-date').value;
     cars[carIndex].expectedReturnDate = document.getElementById('expected-return-date').value; 
     cars[carIndex].renterName = document.getElementById('renter-name').value; 
-    
-    cars[carIndex].employeeName = document.getElementById('employee-name').value; 
+    cars[carIndex].employeeName = currentUser;
     cars[carIndex].dailyPrice = parseInt(document.getElementById('daily-price').value); 
     
     const enteredStartKm = parseInt(document.getElementById('rent-km').value);
@@ -318,7 +354,7 @@ document.getElementById('rent-car-form').addEventListener('submit', (e) => {
     rentModal.style.display = 'none';
 });
 
-// --- TESLİM ALMA İŞLEMLERİ ---
+// --- TESLİM ALMA VE KM AŞIM HESAPLAMA İŞLEMİ ---
 function openReturnModal(id) {
     const car = cars.find(c => c.id === id);
     document.getElementById('return-car-id').value = id;
@@ -326,6 +362,19 @@ function openReturnModal(id) {
     document.getElementById('return-km').min = car.startKm; 
     document.getElementById('return-km').value = '';
     
+    let extraKmInputContainer = document.getElementById('extra-km-price-group');
+    if (!extraKmInputContainer) {
+        const form = document.getElementById('return-car-form');
+        const div = document.createElement('div');
+        div.className = 'input-group';
+        div.id = 'extra-km-price-group';
+        div.innerHTML = `
+            <label>KM Aşım Birim Ücreti (₺)</label>
+            <input type="number" id="extra-km-price" required value="5" placeholder="Örn: 5">
+        `;
+        form.insertBefore(div, form.querySelector('button'));
+    }
+
     returnModal.style.display = 'flex';
 }
 document.getElementById('close-return-modal').addEventListener('click', () => returnModal.style.display = 'none');
@@ -334,6 +383,7 @@ document.getElementById('return-car-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('return-car-id').value;
     const returnKm = parseInt(document.getElementById('return-km').value);
+    const extraKmPrice = parseFloat(document.getElementById('extra-km-price').value) || 0;
     
     const carIndex = cars.findIndex(c => c.id === id);
     
@@ -349,10 +399,19 @@ document.getElementById('return-car-form').addEventListener('submit', (e) => {
     
     const diffTime = Math.abs(today - rentDate);
     let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
     if(diffDays === 0) diffDays = 1; 
 
-    const totalCost = diffDays * cars[carIndex].dailyPrice;
+    const allowedKm = diffDays * 300;
+    let extraKm = 0;
+    let extraKmCost = 0;
+
+    if (distanceTraveled > allowedKm) {
+        extraKm = distanceTraveled - allowedKm;
+        extraKmCost = extraKm * extraKmPrice;
+    }
+
+    const rentalBaseCost = diffDays * cars[carIndex].dailyPrice;
+    const totalCost = rentalBaseCost + extraKmCost;
 
     const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
     
@@ -366,13 +425,27 @@ document.getElementById('return-car-form').addEventListener('submit', (e) => {
     revenueData[monthKey].details.push({
         carName: `${cars[carIndex].brand} ${cars[carIndex].model}${displayPlate}`, 
         renter: cars[carIndex].renterName,
-        employee: cars[carIndex].employeeName,
+        employee: currentUser,
         days: diffDays,
         amount: totalCost,
+        extraKmCost: extraKmCost,
         date: today.toLocaleDateString('tr-TR')
     });
 
-    alert(`Araç teslim alındı!\n\nYapılan Yol: ${distanceTraveled} KM\nKiralama Süresi: ${diffDays} Gün\nTahsil Edilecek Tutar: ${totalCost} ₺`);
+    let alertMessage = `Araç teslim alındı!\n\n` +
+                       `Kiralama Süresi: ${diffDays} Gün\n` +
+                       `Yapılan Toplam Yol: ${distanceTraveled} KM\n` +
+                       `Yasal KM Hakkı (${diffDays} gün x 300 KM): ${allowedKm} KM\n`;
+
+    if (extraKm > 0) {
+        alertMessage += `⚠️ Aşım Miktarı: ${extraKm} KM\n` +
+                        `Extra Ücret: +${extraKmCost} ₺\n`;
+    } else {
+        alertMessage += `✅ KM aşımı yapılmamıştır.\n`;
+    }
+
+    alertMessage += `\nToplam Tahsil Edilecek Tutar: ${totalCost} ₺`;
+    alert(alertMessage);
 
     cars[carIndex].status = 'available';
     cars[carIndex].km = returnKm; 
@@ -387,16 +460,31 @@ document.getElementById('return-car-form').addEventListener('submit', (e) => {
     returnModal.style.display = 'none';
 });
 
-// --- EXCEL'E AKTAR İŞLEMİ (NOKTALI VİRGÜL İLE) ---
+// --- YÖNETİCİ: YANLIŞ TAHSİLAT KAYDINI SİLME ---
+window.deleteRevenueItem = function(monthKey, index) {
+    if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
+    if (confirm("Bu tahsilat kaydını silmek istediğinize emin misiniz?")) {
+        const item = revenueData[monthKey].details[index];
+        revenueData[monthKey].total -= item.amount;
+        revenueData[monthKey].details.splice(index, 1);
+
+        if (revenueData[monthKey].details.length === 0) {
+            delete revenueData[monthKey];
+        }
+
+        saveData();
+    }
+};
+
+// --- EXCEL'E AKTAR İŞLEMİ ---
 document.getElementById('export-excel-btn').addEventListener('click', () => {
     if(Object.keys(revenueData).length === 0) {
         alert("Dışa aktarılacak tahsilat verisi bulunmuyor.");
         return;
     }
 
-    let csvContent = "Ay/Yıl;Araç Bilgisi;Müşteri;Personel;Süre (Gün);Tutar (TL);Teslim Tarihi\n";
+    let csvContent = "Ay/Yıl;Araç Bilgisi;Müşteri;Personel;Süre (Gün);Aşan KM Ücreti;Tutar (TL);Teslim Tarihi\n";
     const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-
     const sortedKeys = Object.keys(revenueData).sort((a, b) => b.localeCompare(a));
 
     sortedKeys.forEach(key => {
@@ -406,15 +494,15 @@ document.getElementById('export-excel-btn').addEventListener('click', () => {
 
         if (monthData.details && monthData.details.length > 0) {
             monthData.details.forEach(detail => {
-                
                 let car = `"${detail.carName || ''}"`;
                 let renter = `"${detail.renter || ''}"`;
                 let employee = `"${detail.employee || ''}"`;
                 let days = detail.days;
+                let extraCost = detail.extraKmCost || 0;
                 let amount = detail.amount;
                 let date = `"${detail.date || ''}"`;
 
-                csvContent += `${monthName};${car};${renter};${employee};${days};${amount};${date}\n`;
+                csvContent += `${monthName};${car};${renter};${employee};${days};${extraCost};${amount};${date}\n`;
             });
         }
     });
@@ -422,7 +510,6 @@ document.getElementById('export-excel-btn').addEventListener('click', () => {
     const bom = "\uFEFF";
     const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
     
@@ -435,13 +522,12 @@ document.getElementById('export-excel-btn').addEventListener('click', () => {
     document.body.removeChild(link);
 });
 
-// Araç Silme
 function deleteCar(id) {
+    if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     if(confirm('Bu aracı silmek istediğinize emin misiniz?')) {
         cars = cars.filter(c => c.id !== id);
         saveData();
     }
 }
 
-// Uygulamayı Başlatırken Veritabanından Verileri Çek
 loadDataFromDB();
