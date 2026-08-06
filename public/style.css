@@ -421,25 +421,28 @@ button:hover { opacity: 0.8; }
     color: #fff;
     transform: translateY(-2px);
 }
-/* Mobil Uyumlu Tasarım Ayarları */
+/* Mobil Uyumlu Tasarım Düzeltmesi */
 @media screen and (max-width: 768px) {
-    /* Ana yerleşimi alt alta kayacak şekilde ayarla */
     body {
-        flex-direction: column;
+        display: flex;
+        flex-direction: column !important;
     }
 
-    /* Sol menüyü mobilde tam genişlik veya üst menü haline getir */
+    /* Menüyü ekrana sabitleyen özellikleri mobilde iptal ediyoruz */
     .sidebar {
         width: 100% !important;
         height: auto !important;
         position: relative !important;
+        top: unset !important;
+        left: unset !important;
         box-shadow: none !important;
     }
 
-    /* İçerik alanının menünün altında kalmasını sağla */
+    /* İçerik alanını menünün altına taşıyoruz */
     .main-content, .dashboard-section, main {
         margin-left: 0 !important;
         width: 100% !important;
         padding: 15px !important;
+        position: relative !important;
     }
 }
