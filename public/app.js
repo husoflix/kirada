@@ -220,6 +220,7 @@ function updateStats() {
     if (rentedCarsEl) rentedCarsEl.innerText = cars.filter(c => c.status === 'rented').length;
 }
 
+// --- AYLIK TAHSİLATLARI VE KM BİLGİLERİNİ GÖSTERME ---
 function renderRevenue() {
     const container = document.getElementById('revenue-container');
     if (!container) return;
@@ -244,17 +245,24 @@ function renderRevenue() {
         if (monthData.details && monthData.details.length > 0) {
             monthData.details.forEach((detail, index) => {
                 let employeeText = detail.employee ? `Personel: ${detail.employee}, ` : '';
-                let extraKmText = detail.extraKmCost ? ` (Aşan KM Ücreti: ${detail.extraKmCost} ₺)` : '';
+                
+                // KM ve Aşım Bilgisini Ekranda Belirtme
+                let kmInfoText = `Toplam Yol: ${detail.distanceTraveled || 0} KM`;
+                if (detail.extraKm && detail.extraKm > 0) {
+                    kmInfoText += ` <span style="color: var(--warning); font-weight: 600;">(⚠️ ${detail.extraKm} KM Aşım, +${detail.extraKmCost} ₺)</span>`;
+                } else {
+                    kmInfoText += ` <span style="color: var(--success);">(Sınır İçinde)</span>`;
+                }
                 
                 let deleteRevBtn = isAdmin 
                     ? `<button onclick="deleteRevenueItem('${key}', ${index})" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-left:10px;" title="Kaydı Sil"><i class="fa-solid fa-trash"></i></button>`
                     : '';
 
                 detailsHtml += `
-                    <div class="revenue-detail-item" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="revenue-detail-item" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                         <div class="car-info">
-                            <i class="fa-solid fa-car"></i> <span>${detail.carName}</span>
-                            (Müşteri: ${detail.renter}, ${employeeText}${detail.days} Gün)${extraKmText}
+                            <i class="fa-solid fa-car"></i> <span>${detail.carName}</span><br>
+                            <small style="color: var(--text-muted);">(Müşteri: ${detail.renter}, ${employeeText}${detail.days} Gün) | ${kmInfoText}</small>
                         </div>
                         <div style="display: flex; align-items: center;">
                             <div class="car-income">${detail.amount.toLocaleString('tr-TR')} ₺</div>
@@ -519,14 +527,17 @@ if (returnCarForm) {
 
         let displayPlate = cars[carIndex].plate ? ` - ${cars[carIndex].plate}` : '';
 
+        // Detaylara mesafe ve aşım bilgileri ekleniyor
         revenueData[monthKey].total += totalCost;
         revenueData[monthKey].details.push({
             carName: `${cars[carIndex].brand} ${cars[carIndex].model}${displayPlate}`, 
             renter: cars[carIndex].renterName,
             employee: currentUser,
             days: diffDays,
-            amount: totalCost,
+            distanceTraveled: distanceTraveled,
+            extraKm: extraKm,
             extraKmCost: extraKmCost,
+            amount: totalCost,
             date: today.toLocaleDateString('tr-TR')
         });
 
@@ -584,7 +595,7 @@ if (exportExcelBtn) {
             return;
         }
 
-        let csvContent = "Ay/Yıl;Araç Bilgisi;Müşteri;Personel;Süre (Gün);Aşan KM Ücreti;Tutar (TL);Teslim Tarihi\n";
+        let csvContent = "Ay/Yıl;Araç Bilgisi;Müşteri;Personel;Süre (Gün);Toplam Yol (KM);Aşan KM;Aşan KM Ücreti (TL);Toplam Tutar (TL);Teslim Tarihi\n";
         const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
         const sortedKeys = Object.keys(revenueData).sort((a, b) => b.localeCompare(a));
 
@@ -599,11 +610,13 @@ if (exportExcelBtn) {
                     let renter = `"${detail.renter || ''}"`;
                     let employee = `"${detail.employee || ''}"`;
                     let days = detail.days;
+                    let distance = detail.distanceTraveled || 0;
+                    let extraKm = detail.extraKm || 0;
                     let extraCost = detail.extraKmCost || 0;
                     let amount = detail.amount;
                     let date = `"${detail.date || ''}"`;
 
-                    csvContent += `${monthName};${car};${renter};${employee};${days};${extraCost};${amount};${date}\n`;
+                    csvContent += `${monthName};${car};${renter};${employee};${days};${distance};${extraKm};${extraCost};${amount};${date}\n`;
                 });
             }
         });
@@ -621,6 +634,18 @@ if (exportExcelBtn) {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    });
+}
+
+// --- PDF OLARAK İNDİR (YAZDIR) İŞLEMİ ---
+const exportPdfBtn = document.getElementById('export-pdf-btn');
+if (exportPdfBtn) {
+    exportPdfBtn.addEventListener('click', () => {
+        if(Object.keys(revenueData).length === 0) {
+            alert("Dışa aktarılacak tahsilat verisi bulunmuyor.");
+            return;
+        }
+        window.print();
     });
 }
 

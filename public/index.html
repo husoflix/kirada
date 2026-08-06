@@ -84,9 +84,16 @@
             <div id="revenue-section" style="display: none;">
                 <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                     <h1>Aylık Tahsilat Geçmişi</h1>
-                    <button id="export-excel-btn" class="btn-success" style="width: auto; padding: 10px 20px;">
-                        <i class="fa-solid fa-file-excel"></i> Excel'e Aktar
-                    </button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <!-- Excel İndir Butonu -->
+                        <button id="export-excel-btn" class="btn-success" style="width: auto; padding: 10px 20px;">
+                            <i class="fa-solid fa-file-excel"></i> Excel'e Aktar
+                        </button>
+                        <!-- PDF İndir Butonu Eklendi -->
+                        <button id="export-pdf-btn" class="btn-danger" style="width: auto; padding: 10px 20px; background-color: #dc2626;">
+                            <i class="fa-solid fa-file-pdf"></i> PDF İndir
+                        </button>
+                    </div>
                 </header>
                 <div class="revenue-list" id="revenue-container">
                     <!-- Tahsilat bilgileri buraya gelecek -->
