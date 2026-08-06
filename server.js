@@ -15,16 +15,47 @@ const db = createClient({
     authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// Tüm araçları getir (Hata yutma ve garanti dizi döndürme mekanizmalı)
+// Veritabanı tablolarını otomatik oluştur (Garanti olsun)
+async function initDB() {
+    try {
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS cars (
+                id TEXT PRIMARY KEY,
+                plate TEXT,
+                brand TEXT,
+                model TEXT,
+                km INTEGER,
+                status TEXT,
+                rentDate TEXT,
+                expectedReturnDate TEXT,
+                renterName TEXT,
+                employeeName TEXT,
+                dailyPrice INTEGER,
+                startKm INTEGER
+            )
+        `);
+        await db.execute(`
+            CREATE TABLE IF NOT EXISTS revenue (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                monthKey TEXT,
+                total INTEGER,
+                details TEXT
+            )
+        `);
+    } catch (err) {
+        console.error("Tablo oluşturma hatası:", err);
+    }
+}
+initDB();
+
+// Tüm araçları getir
 app.get('/api/cars', async (req, res) => {
     try {
         const result = await db.execute("SELECT * FROM cars");
-        // LibSQL client genelde sonuçları 'rows' içinde verir, garantiye alıyoruz:
-        const rows = result.rows || result || [];
-        res.json(Array.isArray(rows) ? rows : []);
+        res.json(result.rows || []);
     } catch (err) {
-        console.error("Araç getirme hatası:", err.message);
-        res.json([]); // Sunucu patlasa bile boş dizi dön ki frontend hata vermesin
+        console.error("Araçları getirme hatası:", err.message);
+        res.json([]);
     }
 });
 
