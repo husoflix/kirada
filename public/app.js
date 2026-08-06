@@ -1,16 +1,7 @@
-// LocalStorage'dan verileri çek
-let cars = JSON.parse(localStorage.getItem('rentACarData')) || [];
-let revenueData = JSON.parse(localStorage.getItem('rentACarRevenue')) || {};
+// Başlangıç değişkenleri (Sunucudan doldurulacak)
+let cars = [];
+let revenueData = {};
 let currentUser = localStorage.getItem('rentACarUser') || null; 
-
-Object.keys(revenueData).forEach(key => {
-    if (typeof revenueData[key] === 'number') {
-        revenueData[key] = {
-            total: revenueData[key],
-            details: []
-        };
-    }
-});
 
 // DOM Elementleri
 const carsContainer = document.getElementById('cars-container');
@@ -24,6 +15,22 @@ const addModal = document.getElementById('add-car-modal');
 const rentModal = document.getElementById('rent-car-modal');
 const returnModal = document.getElementById('return-car-modal');
 const editKmModal = document.getElementById('edit-km-modal'); 
+
+// 1. Verileri Turso Veritabanından (Backend üzerinden) Çek
+async function loadDataFromDB() {
+    try {
+        const carsRes = await fetch('/api/cars');
+        cars = await carsRes.json();
+
+        const revRes = await fetch('/api/revenue');
+        revenueData = await revRes.json();
+
+        // Veriler geldikten sonra uygulamayı başlat
+        initApp();
+    } catch (err) {
+        console.error("Veriler yüklenirken hata oluştu:", err);
+    }
+}
 
 // Uygulama Başlatıcı
 function initApp() {
@@ -53,13 +60,27 @@ document.getElementById('logout-btn').addEventListener('click', () => {
     document.getElementById('login-screen').style.display = 'flex';
 });
 
-// Verileri LocalStorage'a kaydet
-function saveData() {
-    localStorage.setItem('rentACarData', JSON.stringify(cars));
-    localStorage.setItem('rentACarRevenue', JSON.stringify(revenueData));
-    renderCars();
-    updateStats();
-    renderRevenue();
+// 2. Verileri Turso Veritabanına (Backend üzerinden) Kaydet
+async function saveData() {
+    try {
+        await fetch('/api/cars/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cars)
+        });
+
+        await fetch('/api/revenue/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(revenueData)
+        });
+
+        renderCars();
+        updateStats();
+        renderRevenue();
+    } catch (err) {
+        console.error("Veriler kaydedilirken hata oluştu:", err);
+    }
 }
 
 // --- MENÜ GEÇİŞLERİ ---
@@ -367,7 +388,6 @@ document.getElementById('export-excel-btn').addEventListener('click', () => {
         return;
     }
 
-    // Türkçe Windows ve Excel için sütun ayracı olarak NOKTALI VİRGÜL (;) kullanıyoruz.
     let csvContent = "Ay/Yıl;Araç Bilgisi;Müşteri;Personel;Süre (Gün);Tutar (TL);Teslim Tarihi\n";
     const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
@@ -388,7 +408,6 @@ document.getElementById('export-excel-btn').addEventListener('click', () => {
                 let amount = detail.amount;
                 let date = `"${detail.date || ''}"`;
 
-                // Tüm verileri virgül yerine noktalı virgül (;) ile birleştir
                 csvContent += `${monthName};${car};${renter};${employee};${days};${amount};${date}\n`;
             });
         }
@@ -418,5 +437,5 @@ function deleteCar(id) {
     }
 }
 
-// Uygulamayı Başlat
-initApp();
+// Uygulamayı Başlatırken Veritabanından Verileri Çek
+loadDataFromDB();
