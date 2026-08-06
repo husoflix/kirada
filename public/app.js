@@ -1,4 +1,4 @@
-// Başlangıç değişkenleri (Sunucudan doldurulacak)
+// Başlangıç değişkenleri (Dizi ve nesne garantili)
 let cars = [];
 let revenueData = {};
 let currentUser = localStorage.getItem('rentACarUser') || null; 
@@ -20,15 +20,21 @@ const editKmModal = document.getElementById('edit-km-modal');
 async function loadDataFromDB() {
     try {
         const carsRes = await fetch('/api/cars');
-        cars = await carsRes.json();
+        const carsData = await carsRes.json();
+        // Gelen veri dizi değilse boş dizi ata (Hata önleyici)
+        cars = Array.isArray(carsData) ? carsData : [];
 
         const revRes = await fetch('/api/revenue');
-        revenueData = await revRes.json();
+        const revData = await revRes.json();
+        revenueData = (revData && typeof revData === 'object') ? revData : {};
 
         // Veriler geldikten sonra uygulamayı başlat
         initApp();
     } catch (err) {
         console.error("Veriler yüklenirken hata oluştu:", err);
+        cars = [];
+        revenueData = {};
+        initApp();
     }
 }
 
