@@ -17,17 +17,22 @@
     font-family: 'Poppins', sans-serif;
 }
 
-body {
+html, body {
     background-color: var(--bg-color);
     color: var(--text-main);
-    display: flex;
     height: 100vh;
-    overflow: hidden;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    overflow-y: auto;
 }
 
 .container {
     display: flex;
     width: 100%;
+    min-height: 100vh;
 }
 
 /* Sidebar */
@@ -38,6 +43,7 @@ body {
     display: flex;
     flex-direction: column;
     border-right: 1px solid #334155;
+    flex-shrink: 0;
 }
 
 .logo {
@@ -111,11 +117,14 @@ header {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .stats {
     display: flex;
     gap: 20px;
+    flex-wrap: wrap;
 }
 
 .stat-box {
@@ -248,13 +257,15 @@ button:hover { opacity: 0.8; }
     justify-content: center;
     align-items: center;
     z-index: 100;
+    padding: 15px;
 }
 
 .modal-content {
     background-color: var(--card-bg);
     padding: 30px;
     border-radius: 12px;
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     border: 1px solid #334155;
     position: relative;
     max-height: 90vh;
@@ -335,6 +346,8 @@ button:hover { opacity: 0.8; }
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #334155;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .revenue-month {
@@ -364,6 +377,8 @@ button:hover { opacity: 0.8; }
     border-bottom: 1px dashed #334155;
     font-size: 14px;
     color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .revenue-detail-item:last-child {
@@ -391,6 +406,7 @@ button:hover { opacity: 0.8; }
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    padding: 15px;
 }
 
 .login-box {
@@ -399,7 +415,8 @@ button:hover { opacity: 0.8; }
     border-radius: 12px;
     border: 1px solid #334155;
     text-align: center;
-    width: 400px;
+    width: 100%;
+    max-width: 400px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
@@ -421,57 +438,43 @@ button:hover { opacity: 0.8; }
     color: #fff;
     transform: translateY(-2px);
 }
-/* Mobil Uyumlu Tasarım Düzeltmesi */
+
+/* Mobil Uyumlu Kesin Çözüm (@media) */
 @media screen and (max-width: 768px) {
+    html, body {
+        height: auto !important;
+        overflow-y: auto !important;
+    }
+
     body {
-        display: flex;
         flex-direction: column !important;
     }
 
-    /* Menüyü ekrana sabitleyen özellikleri mobilde iptal ediyoruz */
+    .container {
+        flex-direction: column !important;
+        height: auto !important;
+    }
+
     .sidebar {
         width: 100% !important;
         height: auto !important;
         position: relative !important;
-        top: unset !important;
-        left: unset !important;
-        box-shadow: none !important;
+        border-right: none;
+        border-bottom: 1px solid #334155;
     }
 
-    /* İçerik alanını menünün altına taşıyoruz */
-    .main-content, .dashboard-section, main {
-        margin-left: 0 !important;
+    .main-content {
         width: 100% !important;
         padding: 15px !important;
-        position: relative !important;
-    }
-}
-/* Mobil Görünüm Kesin Çözüm */
-@media screen and (max-width: 768px) {
-    html, body {
-        display: block !important;
-        position: static !important;
-        overflow-x: hidden !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        overflow-y: visible !important;
     }
 
-    .sidebar {
+    .creator-tag {
         position: relative !important;
-        width: 100% !important;
-        height: auto !important;
-        display: block !important;
-        float: none !important;
-        clear: both !important;
-    }
-
-    .main-content, main, #dashboard-section, #revenue-section {
-        position: relative !important;
-        width: 100% !important;
-        margin-left: 0 !important;
-        left: 0 !important;
-        display: block !important;
-        clear: both !important;
+        bottom: auto !important;
+        right: auto !important;
+        text-align: center;
+        padding: 20px 0;
+        pointer-events: auto;
     }
 }
