@@ -53,8 +53,9 @@ function initApp() {
         if (loginScreen) loginScreen.style.display = 'none';
         if (loggedInUserEl) loggedInUserEl.innerText = currentUser;
         
+        // Sadece Admin (Egemen Akbulut) görebilir
         if (navAddCar) navAddCar.style.display = isAdmin ? 'flex' : 'none';
-        if (navAddExpense) navAddExpense.style.display = 'flex';
+        if (navAddExpense) navAddExpense.style.display = isAdmin ? 'flex' : 'none';
 
         checkOverdueCars();
     }
@@ -95,7 +96,7 @@ function checkOverdueCars() {
     }
 }
 
-// --- TOPLAM KİRALAMA GÜNÜNÜ DİNAMİK VE DOĞRU HESAPLAMA ---
+// --- TOPLAM KİRALAMA GÜNÜNÜ DİNAMİK HESAPLAMA ---
 function calculateTotalDays(rentDateStr, expectedDateStr) {
     if (!rentDateStr) return 1;
     
@@ -261,7 +262,8 @@ function renderCars() {
             ? `<button class="btn-danger" onclick="deleteCar('${car.id}')" style="width: auto; padding: 10px 14px;"><i class="fa-solid fa-trash"></i></button>` 
             : '';
 
-        let editRentalBtn = !isAvailable 
+        // Sadece Admin için Kira Düzenle Butonu
+        let editRentalBtn = (!isAvailable && isAdmin)
             ? `<button class="btn-primary" onclick="openEditRentalModal('${car.id}')" style="width: auto; padding: 10px 14px;" title="Kira ve Süre Düzenle"><i class="fa-solid fa-pen-to-square"></i></button>`
             : '';
 
@@ -423,11 +425,12 @@ function renderRevenue() {
     container.innerHTML = htmlContent;
 }
 
-// --- ARAÇ EKLEME ---
+// --- ARAÇ EKLEME (Sadece Yönetici) ---
 const navAddCarBtn = document.getElementById('nav-add-car');
 if (navAddCarBtn) {
     navAddCarBtn.addEventListener('click', () => {
-        if (isAdmin && addModal) addModal.style.display = 'flex';
+        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
+        if (addModal) addModal.style.display = 'flex';
     });
 }
 const closeAddModalBtn = document.getElementById('close-add-modal');
@@ -468,10 +471,11 @@ if (addCarForm) {
     });
 }
 
-// --- GİDER EKLEME İŞLEMLERİ ---
+// --- GİDER EKLEME İŞLEMLERİ (Sadece Yönetici) ---
 const navAddExpenseBtn = document.getElementById('nav-add-expense');
 if (navAddExpenseBtn) {
     navAddExpenseBtn.addEventListener('click', () => {
+        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
         if (addExpenseModal) {
             document.getElementById('expense-date').valueAsDate = new Date();
             addExpenseModal.style.display = 'flex';
@@ -489,6 +493,8 @@ const addExpenseForm = document.getElementById('add-expense-form');
 if (addExpenseForm) {
     addExpenseForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
+
         const type = document.getElementById('expense-type').value;
         const dateStr = document.getElementById('expense-date').value;
         const desc = document.getElementById('expense-desc').value;
@@ -525,7 +531,7 @@ if (addExpenseForm) {
     });
 }
 
-// --- KM DÜZENLEME ---
+// --- KM DÜZENLEME (Sadece Yönetici) ---
 const closeEditKmModalBtn = document.getElementById('close-edit-km-modal');
 if (closeEditKmModalBtn) {
     closeEditKmModalBtn.addEventListener('click', () => {
@@ -534,7 +540,7 @@ if (closeEditKmModalBtn) {
 }
 
 window.openEditKmModal = function(id) {
-    if (!isAdmin) return;
+    if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
     document.getElementById('edit-km-car-id').value = id;
@@ -546,7 +552,7 @@ const editKmForm = document.getElementById('edit-km-form');
 if (editKmForm) {
     editKmForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (!isAdmin) return;
+        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
         const id = document.getElementById('edit-km-car-id').value;
         const newKm = parseInt(document.getElementById('new-km-input').value) || 0;
         
@@ -559,7 +565,7 @@ if (editKmForm) {
     });
 }
 
-// --- KİRALAMA İŞLEMİ ---
+// --- KİRALAMA İŞLEMİ (Tüm Personel) ---
 window.openRentModal = function(id) {
     const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
@@ -644,8 +650,9 @@ if (rentCarForm) {
     });
 }
 
-// --- KİRA BİLGİLERİNİ DÜZENLEME (GÜNCELLENEN KISIM) ---
+// --- KİRA BİLGİLERİNİ DÜZENLEME (Sadece Yönetici) ---
 window.openEditRentalModal = function(id) {
+    if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
 
@@ -717,6 +724,8 @@ const editRentalForm = document.getElementById('edit-rental-form');
 if (editRentalForm) {
     editRentalForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
+
         const id = document.getElementById('edit-rental-car-id').value;
         const carIndex = cars.findIndex(c => String(c.id) === String(id));
         if (carIndex === -1) {
@@ -746,7 +755,6 @@ if (editRentalForm) {
             }
         }
 
-        // Araç kaydını güncelle
         cars[carIndex].renterName = renterName;
         cars[carIndex].dailyPrice = dailyPrice;
         cars[carIndex].expectedReturnDate = newReturnDateStr;
@@ -790,7 +798,7 @@ if (editRentalForm) {
     });
 }
 
-// --- TESLİM ALMA VE KM AŞIM HESAPLAMA İŞLEMİ ---
+// --- TESLİM ALMA VE KM AŞIM HESAPLAMA İŞLEMİ (Tüm Personel) ---
 window.openReturnModal = function(id) {
     const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
@@ -934,7 +942,7 @@ if (returnCarForm) {
     });
 }
 
-// --- YÖNETİCİ: YANLIŞ KAYIT SİLME ---
+// --- YÖNETİCİ: YANLIŞ KAYIT SİLME (Sadece Yönetici) ---
 window.deleteRevenueItem = function(monthKey, index) {
     if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     if (confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
@@ -956,7 +964,7 @@ window.deleteRevenueItem = function(monthKey, index) {
     }
 };
 
-// --- EXCEL'E AKTAR İŞLEMİ (TÜRKÇE KARAKTER UYUMLU .XLS) ---
+// --- EXCEL'E AKTAR İŞLEMİ (.XLS) ---
 const exportExcelBtn = document.getElementById('export-excel-btn');
 if (exportExcelBtn) {
     exportExcelBtn.addEventListener('click', () => {

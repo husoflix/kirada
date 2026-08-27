@@ -95,11 +95,12 @@
                         <i class="fa-solid fa-chart-line-up"></i> 
                         <span>Aylık Tahsilat & Bilanço</span>
                     </li>
-                    <!-- Gider Ekle: Simgeli ve Aylık Tahsilatın Hemen Altında -->
-                    <li id="nav-add-expense">
+                    <!-- Sadece Yöneticiye Özel Gider Butonu -->
+                    <li id="nav-add-expense" style="display: none;">
                         <i class="fa-solid fa-receipt"></i> 
                         <span>Gider / Masraf Ekle</span>
                     </li>
+                    <!-- Sadece Yöneticiye Özel Araç Ekle Butonu -->
                     <li id="nav-add-car" style="display: none;">
                         <i class="fa-solid fa-circle-plus"></i> 
                         <span>Yeni Filo Aracı Ekle</span>
@@ -155,7 +156,7 @@
                     </div>
                     <div class="action-btn-group">
                         <button id="export-excel-btn" class="btn-secondary">
-                            <i class="fa-solid fa-file-excel"></i> Excel Çıktısı (.CSV)
+                            <i class="fa-solid fa-file-excel"></i> Excel Çıktısı (.XLS)
                         </button>
                         <button id="export-pdf-btn" class="btn-danger">
                             <i class="fa-solid fa-file-pdf"></i> Resmi PDF Raporu
