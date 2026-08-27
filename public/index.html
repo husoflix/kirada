@@ -95,12 +95,12 @@
                         <i class="fa-solid fa-chart-line-up"></i> 
                         <span>Aylık Tahsilat & Bilanço</span>
                     </li>
-                    <!-- Sadece Yöneticiye Özel Gider Butonu -->
+                    <!-- Sadece Yönetici Görür -->
                     <li id="nav-add-expense" style="display: none;">
                         <i class="fa-solid fa-receipt"></i> 
                         <span>Gider / Masraf Ekle</span>
                     </li>
-                    <!-- Sadece Yöneticiye Özel Araç Ekle Butonu -->
+                    <!-- Sadece Yönetici Görür -->
                     <li id="nav-add-car" style="display: none;">
                         <i class="fa-solid fa-circle-plus"></i> 
                         <span>Yeni Filo Aracı Ekle</span>
@@ -171,7 +171,7 @@
 
     <div class="creator-tag">Developed for High-Performance Fleet Operations</div>
 
-    <!-- Yeni Araç Ekleme Modalı -->
+    <!-- Yeni Araç Ekleme Modalı (Admin) -->
     <div class="modal" id="add-car-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-add-modal">&times;</span>
@@ -201,7 +201,7 @@
         </div>
     </div>
 
-    <!-- Gider Ekleme Modalı -->
+    <!-- Gider Ekleme Modalı (Admin) -->
     <div class="modal" id="add-expense-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-expense-modal">&times;</span>
@@ -231,6 +231,86 @@
                     <input type="text" id="expense-desc" required placeholder="Örn: Bosch Car Service - Periyodik Bakım">
                 </div>
                 <button type="submit" class="btn-danger"><i class="fa-solid fa-money-bill-wave"></i> Gideri Kasadan Düş</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Geçmişe Dönük / Unutulan Tahsilat Ekleme Modalı (Sadece Admin) -->
+    <div class="modal" id="manual-revenue-modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-manual-revenue-modal">&times;</span>
+            <div class="modal-header-icon modal-success"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+            <h2>Geçmiş / Manuel Tahsilat Ekle</h2>
+            <form id="manual-revenue-form">
+                <div class="input-group">
+                    <label>Filodaki Kayıtlı Araç</label>
+                    <select id="manual-car-select" required>
+                        <option value="">-- Araç Seçiniz --</option>
+                    </select>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Müşteri Adı & Soyadı</label>
+                        <input type="text" id="manual-renter-name" required placeholder="Örn: Mehmet Yılmaz">
+                    </div>
+                    <div class="input-group">
+                        <label>İşlemi Yapan Personel</label>
+                        <select id="manual-employee-select" required>
+                            <option value="EGEMEN AKBULUT">EGEMEN AKBULUT</option>
+                            <option value="ANIL ŞEKER">ANIL ŞEKER</option>
+                            <option value="GÜVEN AKBULUT">GÜVEN AKBULUT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Çıkış Tarihi</label>
+                        <input type="date" id="manual-rent-date" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Teslim / Dönüş Tarihi</label>
+                        <input type="date" id="manual-return-date" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Günlük Kira Ücreti (₺)</label>
+                        <input type="number" id="manual-daily-price" required placeholder="Örn: 1500">
+                    </div>
+                    <div class="input-group">
+                        <label>Çıkış Kilometresi</label>
+                        <input type="number" id="manual-start-km" required placeholder="Örn: 50000">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>KM Aşımı Yapıldı mı?</label>
+                    <select id="manual-has-km-overage" required>
+                        <option value="no">Hayır (Sınır İçinde)</option>
+                        <option value="yes">Evet (Aşım Var)</option>
+                    </select>
+                </div>
+
+                <!-- Aşım varsa açılacak dinamik alan -->
+                <div id="manual-overage-container" style="display: none; background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.3); padding: 14px; border-radius: 10px; margin-bottom: 16px;">
+                    <div class="input-row">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label style="color: #fbbf24;">Dönüş Kilometresi</label>
+                            <input type="number" id="manual-return-km" placeholder="Örn: 51200">
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label style="color: #fbbf24;">KM Başı Ücret (₺/KM)</label>
+                            <input type="number" id="manual-extra-km-price" value="5" placeholder="5">
+                        </div>
+                    </div>
+                    <small id="manual-km-summary-text" style="color: #94a3b8; display: block; margin-top: 8px;"></small>
+                </div>
+
+                <div class="input-group">
+                    <label>Açıklama / Not</label>
+                    <input type="text" id="manual-notes" placeholder="Opsiyonel not ekleyin...">
+                </div>
+                <button type="submit" class="btn-success"><i class="fa-solid fa-file-invoice-dollar"></i> Tahsilatı Kaydet & Bilançoya İşle</button>
             </form>
         </div>
     </div>
@@ -280,7 +360,7 @@
         </div>
     </div>
 
-    <!-- Kira Bilgilerini Düzenleme Modalı -->
+    <!-- Kira Bilgilerini Düzenleme Modalı (Admin) -->
     <div class="modal" id="edit-rental-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-edit-rental-modal">&times;</span>
@@ -345,7 +425,7 @@
         </div>
     </div>
 
-    <!-- Kilometre Güncelleme Modalı -->
+    <!-- Kilometre Güncelleme Modalı (Admin) -->
     <div class="modal" id="edit-km-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-edit-km-modal">&times;</span>

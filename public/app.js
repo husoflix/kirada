@@ -20,6 +20,7 @@ const rentModal = document.getElementById('rent-car-modal');
 const editRentalModal = document.getElementById('edit-rental-modal');
 const returnModal = document.getElementById('return-car-modal');
 const editKmModal = document.getElementById('edit-km-modal'); 
+const manualRevenueModal = document.getElementById('manual-revenue-modal');
 
 // 1. Verileri Turso Veritabanından Çek
 async function loadDataFromDB() {
@@ -262,7 +263,6 @@ function renderCars() {
             ? `<button class="btn-danger" onclick="deleteCar('${car.id}')" style="width: auto; padding: 10px 14px;"><i class="fa-solid fa-trash"></i></button>` 
             : '';
 
-        // Sadece Admin için Kira Düzenle Butonu
         let editRentalBtn = (!isAvailable && isAdmin)
             ? `<button class="btn-primary" onclick="openEditRentalModal('${car.id}')" style="width: auto; padding: 10px 14px;" title="Kira ve Süre Düzenle"><i class="fa-solid fa-pen-to-square"></i></button>`
             : '';
@@ -300,7 +300,7 @@ function updateStats() {
     if (rentedCarsEl) rentedCarsEl.innerText = cars.filter(c => c.status === 'rented').length;
 }
 
-// --- AYLIK GELİR/GİDER GÖSTERME ---
+// --- AYLIK GELİR/GİDER GÖSTERME (SOL GELİR - SAĞ GİDER AYRI SÜTUN) ---
 function renderRevenue() {
     const container = document.getElementById('revenue-container');
     if (!container) return;
@@ -387,6 +387,11 @@ function renderRevenue() {
         const netColor = netBalance >= 0 ? '#34d399' : '#f43f5e';
         const netSign = netBalance >= 0 ? '+' : '';
 
+        // Sadece Admin görsün: "+ Yeni Tahsilat" Butonu
+        let addManualRevBtn = isAdmin 
+            ? `<button class="btn-add-manual-rev" onclick="openManualRevenueModal('${key}')"><i class="fa-solid fa-plus"></i> Yeni Tahsilat Ekle</button>`
+            : '';
+
         htmlContent += `
             <div class="revenue-card">
                 <div class="revenue-card-header">
@@ -401,7 +406,8 @@ function renderRevenue() {
                     <!-- Sol: Gelirler -->
                     <div class="revenue-column">
                         <div class="column-header-income">
-                            <i class="fa-solid fa-arrow-down-left"></i> Gelir Kayıtları (+${totalIncome.toLocaleString('tr-TR')} ₺)
+                            <span><i class="fa-solid fa-arrow-down-left"></i> Gelir Kayıtları (+${totalIncome.toLocaleString('tr-TR')} ₺)</span>
+                            ${addManualRevBtn}
                         </div>
                         <div class="column-items-list">
                             ${incomeHtml || '<div class="empty-col-msg">Bu ay için gelir kaydı yok.</div>'}
@@ -425,7 +431,144 @@ function renderRevenue() {
     container.innerHTML = htmlContent;
 }
 
-// --- ARAÇ EKLEME (Sadece Yönetici) ---
+// --- MANUEL / GEÇMİŞ TAHSİLAT EKLEME MODALI (Admin) ---
+window.openManualRevenueModal = function() {
+    if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
+    
+    const carSelect = document.getElementById('manual-car-select');
+    if (carSelect) {
+        carSelect.innerHTML = '<option value="">-- Araç Seçiniz --</option>';
+        cars.forEach(car => {
+            const opt = document.createElement('option');
+            opt.value = car.id;
+            opt.innerText = `${car.brand} ${car.model} (${car.plate || 'Plakasız'})`;
+            carSelect.appendChild(opt);
+        });
+    }
+
+    document.getElementById('manual-renter-name').value = '';
+    document.getElementById('manual-daily-price').value = '';
+    document.getElementById('manual-start-km').value = '';
+    document.getElementById('manual-return-km').value = '';
+    document.getElementById('manual-extra-km-price').value = '5';
+    document.getElementById('manual-notes').value = '';
+    document.getElementById('manual-has-km-overage').value = 'no';
+    
+    document.getElementById('manual-rent-date').valueAsDate = new Date();
+    document.getElementById('manual-return-date').valueAsDate = new Date();
+    
+    const overageContainer = document.getElementById('manual-overage-container');
+    if (overageContainer) overageContainer.style.display = 'none';
+
+    if (manualRevenueModal) manualRevenueModal.style.display = 'flex';
+};
+
+const closeManualRevBtn = document.getElementById('close-manual-revenue-modal');
+if (closeManualRevBtn) {
+    closeManualRevBtn.addEventListener('click', () => {
+        if (manualRevenueModal) manualRevenueModal.style.display = 'none';
+    });
+}
+
+// Araç seçildiğinde KM'sini otomatik getir
+const manualCarSelectEl = document.getElementById('manual-car-select');
+if (manualCarSelectEl) {
+    manualCarSelectEl.addEventListener('change', (e) => {
+        const selectedCar = cars.find(c => String(c.id) === String(e.target.value));
+        if (selectedCar) {
+            document.getElementById('manual-start-km').value = selectedCar.km || 0;
+        }
+    });
+}
+
+// Aşım var mı seçimi değiştiğinde
+const manualHasOverageEl = document.getElementById('manual-has-km-overage');
+if (manualHasOverageEl) {
+    manualHasOverageEl.addEventListener('change', (e) => {
+        const container = document.getElementById('manual-overage-container');
+        if (container) {
+            container.style.display = e.target.value === 'yes' ? 'block' : 'none';
+        }
+    });
+}
+
+const manualRevForm = document.getElementById('manual-revenue-form');
+if (manualRevForm) {
+    manualRevForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
+
+        const carId = document.getElementById('manual-car-select').value;
+        const selectedCar = cars.find(c => String(c.id) === String(carId));
+        if (!selectedCar) return alert("Lütfen geçerli bir araç seçin!");
+
+        const renterName = document.getElementById('manual-renter-name').value;
+        const employee = document.getElementById('manual-employee-select').value;
+        const rentDateStr = document.getElementById('manual-rent-date').value;
+        const returnDateStr = document.getElementById('manual-return-date').value;
+        const dailyPrice = parseInt(document.getElementById('manual-daily-price').value) || 0;
+        const startKm = parseInt(document.getElementById('manual-start-km').value) || 0;
+        const hasOverage = document.getElementById('manual-has-km-overage').value;
+
+        const totalDays = calculateTotalDays(rentDateStr, returnDateStr);
+        const baseIncome = totalDays * dailyPrice;
+
+        let distanceTraveled = '-';
+        let extraKm = 0;
+        let extraKmCost = 0;
+
+        if (hasOverage === 'yes') {
+            const returnKm = parseInt(document.getElementById('manual-return-km').value) || 0;
+            const extraKmPrice = parseFloat(document.getElementById('manual-extra-km-price').value) || 0;
+
+            if (returnKm < startKm) {
+                return alert("Dönüş KM'si çıkış KM'sinden küçük olamaz!");
+            }
+
+            distanceTraveled = returnKm - startKm;
+            const allowedKm = totalDays * 300;
+
+            if (distanceTraveled > allowedKm) {
+                extraKm = distanceTraveled - allowedKm;
+                extraKmCost = extraKm * extraKmPrice;
+            }
+        }
+
+        const totalAmount = baseIncome + extraKmCost;
+
+        const [rY, rM, rD] = returnDateStr.split('-').map(Number);
+        const monthKey = `${rY}-${String(rM).padStart(2, '0')}`;
+
+        if (!revenueData[monthKey] || typeof revenueData[monthKey] !== 'object') {
+            revenueData[monthKey] = { total: 0, details: [] };
+        }
+
+        let displayPlate = selectedCar.plate ? ` - ${selectedCar.plate}` : '';
+
+        revenueData[monthKey].total += totalAmount;
+        revenueData[monthKey].details.push({
+            type: 'income',
+            carId: selectedCar.id,
+            carName: `${selectedCar.brand} ${selectedCar.model}${displayPlate}`,
+            renter: renterName,
+            employee: employee,
+            days: totalDays,
+            distanceTraveled: distanceTraveled,
+            extraKm: extraKm,
+            extraKmCost: extraKmCost,
+            amount: totalAmount,
+            date: new Date(rY, rM - 1, rD).toLocaleDateString('tr-TR')
+        });
+
+        alert(`Tahsilat başarıyla eklendi!\nSüre: ${totalDays} Gün\nKira Geliri: ${baseIncome} ₺\nKM Aşım Geliri: ${extraKmCost} ₺\nToplam Tahsilat: ${totalAmount} ₺`);
+
+        saveData();
+        if (manualRevenueModal) manualRevenueModal.style.display = 'none';
+        e.target.reset();
+    });
+}
+
+// --- ARAÇ EKLEME (Admin) ---
 const navAddCarBtn = document.getElementById('nav-add-car');
 if (navAddCarBtn) {
     navAddCarBtn.addEventListener('click', () => {
@@ -471,7 +614,7 @@ if (addCarForm) {
     });
 }
 
-// --- GİDER EKLEME İŞLEMLERİ (Sadece Yönetici) ---
+// --- GİDER EKLEME İŞLEMLERİ (Admin) ---
 const navAddExpenseBtn = document.getElementById('nav-add-expense');
 if (navAddExpenseBtn) {
     navAddExpenseBtn.addEventListener('click', () => {
@@ -531,7 +674,7 @@ if (addExpenseForm) {
     });
 }
 
-// --- KM DÜZENLEME (Sadece Yönetici) ---
+// --- KM DÜZENLEME (Admin) ---
 const closeEditKmModalBtn = document.getElementById('close-edit-km-modal');
 if (closeEditKmModalBtn) {
     closeEditKmModalBtn.addEventListener('click', () => {
@@ -650,7 +793,7 @@ if (rentCarForm) {
     });
 }
 
-// --- KİRA BİLGİLERİNİ DÜZENLEME (Sadece Yönetici) ---
+// --- KİRA BİLGİLERİNİ DÜZENLEME (Admin) ---
 window.openEditRentalModal = function(id) {
     if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     const car = cars.find(c => String(c.id) === String(id));
@@ -942,7 +1085,7 @@ if (returnCarForm) {
     });
 }
 
-// --- YÖNETİCİ: YANLIŞ KAYIT SİLME (Sadece Yönetici) ---
+// --- YÖNETİCİ: YANLIŞ KAYIT SİLME (Admin) ---
 window.deleteRevenueItem = function(monthKey, index) {
     if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     if (confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
