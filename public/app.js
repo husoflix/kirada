@@ -105,11 +105,9 @@ function calculateTotalDays(rentDateStr, expectedDateStr) {
     let endDate = new Date();
     endDate.setHours(0, 0, 0, 0);
 
-    // Sözleşmedeki uzatılmış tarih varsa onu al
     if (expectedDateStr) {
         const [eY, eM, eD] = expectedDateStr.split('-').map(Number);
         const expDate = new Date(eY, eM - 1, eD);
-        // Eğer uzatılan tarih bugünden sonraysa veya eşitse sözleşme gününü esas al
         if (expDate >= endDate) {
             endDate = expDate;
         }
@@ -453,7 +451,7 @@ if (addCarForm) {
             plate: upperPlate, 
             brand: document.getElementById('car-brand').value,
             model: document.getElementById('car-model').value,
-            km: parseInt(document.getElementById('car-km').value),
+            km: parseInt(document.getElementById('car-km').value) || 0,
             status: 'available',
             rentDate: null,
             expectedReturnDate: null, 
@@ -494,7 +492,7 @@ if (addExpenseForm) {
         const type = document.getElementById('expense-type').value;
         const dateStr = document.getElementById('expense-date').value;
         const desc = document.getElementById('expense-desc').value;
-        const amount = parseInt(document.getElementById('expense-amount').value);
+        const amount = parseInt(document.getElementById('expense-amount').value) || 0;
 
         const [dY, dM, dD] = dateStr.split('-').map(Number);
         const dDate = new Date(dY, dM - 1, dD);
@@ -537,7 +535,7 @@ if (closeEditKmModalBtn) {
 
 window.openEditKmModal = function(id) {
     if (!isAdmin) return;
-    const car = cars.find(c => c.id === id);
+    const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
     document.getElementById('edit-km-car-id').value = id;
     document.getElementById('new-km-input').value = car.km; 
@@ -550,9 +548,9 @@ if (editKmForm) {
         e.preventDefault();
         if (!isAdmin) return;
         const id = document.getElementById('edit-km-car-id').value;
-        const newKm = parseInt(document.getElementById('new-km-input').value);
+        const newKm = parseInt(document.getElementById('new-km-input').value) || 0;
         
-        const carIndex = cars.findIndex(c => c.id === id);
+        const carIndex = cars.findIndex(c => String(c.id) === String(id));
         if (carIndex !== -1) {
             cars[carIndex].km = newKm;
             saveData();
@@ -563,7 +561,7 @@ if (editKmForm) {
 
 // --- KİRALAMA İŞLEMİ ---
 window.openRentModal = function(id) {
-    const car = cars.find(c => c.id === id);
+    const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
     document.getElementById('rent-car-id').value = id;
     document.getElementById('rent-km').value = car.km; 
@@ -592,12 +590,12 @@ if (rentCarForm) {
     rentCarForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const id = document.getElementById('rent-car-id').value;
-        const carIndex = cars.findIndex(c => c.id === id);
+        const carIndex = cars.findIndex(c => String(c.id) === String(id));
         if (carIndex === -1) return;
 
         const rentDateStr = document.getElementById('rent-date').value;
         const expectedReturnStr = document.getElementById('expected-return-date').value;
-        const dailyPrice = parseInt(document.getElementById('daily-price').value);
+        const dailyPrice = parseInt(document.getElementById('daily-price').value) || 0;
         const notes = document.getElementById('rent-notes').value;
 
         const plannedDays = calculateTotalDays(rentDateStr, expectedReturnStr);
@@ -611,7 +609,7 @@ if (rentCarForm) {
         cars[carIndex].dailyPrice = dailyPrice; 
         cars[carIndex].notes = notes;
         
-        const enteredStartKm = parseInt(document.getElementById('rent-km').value);
+        const enteredStartKm = parseInt(document.getElementById('rent-km').value) || 0;
         cars[carIndex].startKm = enteredStartKm; 
         cars[carIndex].km = enteredStartKm; 
 
@@ -646,9 +644,9 @@ if (rentCarForm) {
     });
 }
 
-// --- KİRA BİLGİLERİNİ DÜZENLEME (GÜN UZATMA VE LİMİT ARTTIRMA) ---
+// --- KİRA BİLGİLERİNİ DÜZENLEME (GÜNCELLENEN KISIM) ---
 window.openEditRentalModal = function(id) {
-    const car = cars.find(c => c.id === id);
+    const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
 
     originalExpectedReturnDate = car.expectedReturnDate;
@@ -657,7 +655,7 @@ window.openEditRentalModal = function(id) {
     document.getElementById('edit-renter-name').value = car.renterName || '';
     document.getElementById('edit-daily-price').value = car.dailyPrice || '';
     document.getElementById('edit-expected-return-date').value = car.expectedReturnDate || '';
-    document.getElementById('edit-rent-km').value = car.startKm || car.km || 0;
+    document.getElementById('edit-rent-km').value = car.startKm !== null && car.startKm !== undefined ? car.startKm : (car.km || 0);
     document.getElementById('edit-rent-notes').value = car.notes || '';
 
     const infoBox = document.getElementById('extension-info-box');
@@ -720,11 +718,17 @@ if (editRentalForm) {
     editRentalForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const id = document.getElementById('edit-rental-car-id').value;
-        const carIndex = cars.findIndex(c => c.id === id);
-        if (carIndex === -1) return;
+        const carIndex = cars.findIndex(c => String(c.id) === String(id));
+        if (carIndex === -1) {
+            alert("Araç bulunamadı!");
+            return;
+        }
 
         const newReturnDateStr = document.getElementById('edit-expected-return-date').value;
-        const dailyPrice = parseInt(document.getElementById('edit-daily-price').value);
+        const dailyPrice = parseInt(document.getElementById('edit-daily-price').value) || 0;
+        const renterName = document.getElementById('edit-renter-name').value;
+        const newStartKm = parseInt(document.getElementById('edit-rent-km').value) || 0;
+        const rentNotes = document.getElementById('edit-rent-notes').value;
 
         let extraDays = 0;
         let extraCost = 0;
@@ -733,7 +737,7 @@ if (editRentalForm) {
             const [oY, oM, oD] = originalExpectedReturnDate.split('-').map(Number);
             const origDate = new Date(oY, oM - 1, oD);
 
-            const [nY, nM, nD] = newDateStr.split('-').map(Number);
+            const [nY, nM, nD] = newReturnDateStr.split('-').map(Number);
             const newDate = new Date(nY, nM - 1, nD);
 
             extraDays = Math.round((newDate - origDate) / (1000 * 60 * 60 * 24));
@@ -742,14 +746,13 @@ if (editRentalForm) {
             }
         }
 
-        cars[carIndex].renterName = document.getElementById('edit-renter-name').value;
+        // Araç kaydını güncelle
+        cars[carIndex].renterName = renterName;
         cars[carIndex].dailyPrice = dailyPrice;
         cars[carIndex].expectedReturnDate = newReturnDateStr;
-        
-        const newStartKm = parseInt(document.getElementById('edit-rent-km').value);
         cars[carIndex].startKm = newStartKm;
         cars[carIndex].km = newStartKm;
-        cars[carIndex].notes = document.getElementById('edit-rent-notes').value;
+        cars[carIndex].notes = rentNotes;
 
         if (extraCost > 0) {
             const today = new Date();
@@ -779,7 +782,7 @@ if (editRentalForm) {
             const newTotalDays = calculateTotalDays(cars[carIndex].rentDate, newReturnDateStr);
             alert(`Kiralama süresi ${extraDays} gün uzatıldı!\nExtra Alınan Tutar: +${extraCost} ₺\nYeni Toplam KM Limiti: ${newTotalDays * 300} KM oldu.`);
         } else {
-            alert("Kiralama bilgileri güncellendi!");
+            alert("Kiralama bilgileri başarıyla güncellendi!");
         }
 
         saveData();
@@ -789,7 +792,7 @@ if (editRentalForm) {
 
 // --- TESLİM ALMA VE KM AŞIM HESAPLAMA İŞLEMİ ---
 window.openReturnModal = function(id) {
-    const car = cars.find(c => c.id === id);
+    const car = cars.find(c => String(c.id) === String(id));
     if (!car) return;
     document.getElementById('return-car-id').value = id;
     document.getElementById('return-start-km').innerText = car.startKm;
@@ -813,8 +816,8 @@ const returnKmInput = document.getElementById('return-km');
 if (returnKmInput) {
     returnKmInput.addEventListener('input', (e) => {
         const id = document.getElementById('return-car-id').value;
-        const car = cars.find(c => c.id === id);
-        if (!car || !car.startKm || !car.rentDate) return;
+        const car = cars.find(c => String(c.id) === String(id));
+        if (!car || car.startKm === null || car.startKm === undefined || !car.rentDate) return;
 
         const returnKm = parseInt(e.target.value) || 0;
         if (returnKm < car.startKm) return;
@@ -850,12 +853,12 @@ if (returnCarForm) {
     returnCarForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const id = document.getElementById('return-car-id').value;
-        const returnKm = parseInt(document.getElementById('return-km').value);
+        const returnKm = parseInt(document.getElementById('return-km').value) || 0;
         
         const extraKmPriceInput = document.getElementById('extra-km-price');
         const extraKmPrice = extraKmPriceInput ? (parseFloat(extraKmPriceInput.value) || 0) : 0;
         
-        const carIndex = cars.findIndex(c => c.id === id);
+        const carIndex = cars.findIndex(c => String(c.id) === String(id));
         if (carIndex === -1) return;
         
         if (returnKm < cars[carIndex].startKm) {
@@ -1085,7 +1088,7 @@ if (exportPdfBtn) {
 window.deleteCar = function(id) {
     if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
     if(confirm('Bu aracı silmek istediğinize emin misiniz?')) {
-        cars = cars.filter(c => c.id !== id);
+        cars = cars.filter(c => String(c.id) !== String(id));
         saveData();
     }
 };
