@@ -3,34 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>kirada</title>
+    <title>kirada • Akıllı Filo & Gelir Yönetim Sistemi</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     
     <!-- Kullanıcı Seçim Ekranı -->
     <div id="login-screen" class="login-overlay">
         <div class="login-box">
-            <div class="logo" style="justify-content: center; margin-bottom: 25px;">
-                <i class="fa-solid fa-car-side"></i>
-                <h2 style="margin-left: 10px;">kirada</h2>
+            <div class="brand-badge">Enterprise Edition</div>
+            <div class="logo-login">
+                <i class="fa-solid fa-car-tunnel"></i>
+                <h2>kirada</h2>
             </div>
-            <h2 style="font-size: 20px; margin-bottom: 20px;">Lütfen Kullanıcı Seçin</h2>
+            <p class="login-subtitle">Devam etmek için operatör veya yönetici profili seçiniz</p>
             
             <div class="user-buttons">
-                <button onclick="handleUserClick('GÜVEN AKBULUT')">GÜVEN AKBULUT</button>
-                <button onclick="handleUserClick('ANIL ŞEKER')">ANIL ŞEKER</button>
-                <button onclick="handleUserClick('EGEMEN AKBULUT')">EGEMEN AKBULUT (Yönetici)</button>
+                <button onclick="handleUserClick('GÜVEN AKBULUT')">
+                    <div class="user-btn-icon"><i class="fa-solid fa-user-shield"></i></div>
+                    <div class="user-btn-text">
+                        <span>GÜVEN AKBULUT</span>
+                        <small>Operasyon Uzmanı</small>
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </button>
+                <button onclick="handleUserClick('ANIL ŞEKER')">
+                    <div class="user-btn-icon"><i class="fa-solid fa-user-tie"></i></div>
+                    <div class="user-btn-text">
+                        <span>ANIL ŞEKER</span>
+                        <small>Operasyon Uzmanı</small>
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </button>
+                <button onclick="handleUserClick('EGEMEN AKBULUT')" class="admin-user-btn">
+                    <div class="user-btn-icon"><i class="fa-solid fa-crown"></i></div>
+                    <div class="user-btn-text">
+                        <span>EGEMEN AKBULUT</span>
+                        <small>Sistem Yöneticisi</small>
+                    </div>
+                    <i class="fa-solid fa-chevron-right arrow-icon"></i>
+                </button>
             </div>
 
-            <div id="password-container" style="display: none; margin-top: 20px;">
+            <div id="password-container" style="display: none; margin-top: 24px;">
                 <div class="input-group" style="text-align: left;">
-                    <label>Yönetici Şifresi</label>
-                    <input type="password" id="admin-password" placeholder="Şifrenizi girin">
+                    <label><i class="fa-solid fa-key"></i> Yönetici Giriş Anahtarı</label>
+                    <input type="password" id="admin-password" placeholder="Şifrenizi giriniz...">
                 </div>
-                <button class="btn-primary" onclick="verifyAdminPassword()" style="margin-top: 10px;">Giriş Yap</button>
+                <button class="btn-primary" onclick="verifyAdminPassword()" style="margin-top: 10px;">
+                    <i class="fa-solid fa-unlock"></i> Sisteme Güvenli Giriş
+                </button>
             </div>
         </div>
     </div>
@@ -38,25 +62,56 @@
     <div class="container">
         <!-- Sol Menü -->
         <aside class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-car-side"></i>
-                <h2>kirada</h2>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon-box">
+                        <i class="fa-solid fa-car-tunnel"></i>
+                    </div>
+                    <div>
+                        <h2>kirada</h2>
+                        <span class="logo-sub">Fleet & Ops</span>
+                    </div>
+                </div>
             </div>
             
             <div class="user-greeting">
-                Hoşgeldiniz, <br>
-                <span id="logged-in-user">...</span>
+                <div class="user-avatar">
+                    <i class="fa-solid fa-circle-user"></i>
+                </div>
+                <div class="user-info-text">
+                    <small>Aktif Operatör</small>
+                    <span id="logged-in-user">...</span>
+                </div>
             </div>
 
             <nav>
+                <div class="nav-section-title">ANA MENÜ</div>
                 <ul class="nav-links">
-                    <li id="nav-dashboard" class="active"><i class="fa-solid fa-house"></i> Gösterge Paneli</li>
-                    <li id="nav-revenue"><i class="fa-solid fa-wallet"></i> Aylık Tahsilat</li>
-                    <li id="nav-add-car" style="display: none;"><i class="fa-solid fa-plus"></i> Yeni Araç Ekle</li>
-                    <li id="nav-add-expense"><i class="fa-solid fa-money-bill-transfer"></i> Gider Ekle</li>
+                    <li id="nav-dashboard" class="active">
+                        <i class="fa-solid fa-chart-pie"></i> 
+                        <span>Gösterge Paneli</span>
+                    </li>
+                    <li id="nav-revenue">
+                        <i class="fa-solid fa-chart-line-up"></i> 
+                        <span>Aylık Tahsilat & Bilanço</span>
+                    </li>
+                    <!-- Gider Ekle: Simgeli ve Aylık Tahsilatın Hemen Altında -->
+                    <li id="nav-add-expense">
+                        <i class="fa-solid fa-receipt"></i> 
+                        <span>Gider / Masraf Ekle</span>
+                    </li>
+                    <li id="nav-add-car" style="display: none;">
+                        <i class="fa-solid fa-circle-plus"></i> 
+                        <span>Yeni Filo Aracı Ekle</span>
+                    </li>
                 </ul>
+
+                <div class="nav-section-title" style="margin-top: 20px;">OTURUM</div>
                 <ul class="logout-link">
-                    <li id="logout-btn" style="color: var(--danger);"><i class="fa-solid fa-right-from-bracket"></i> Kullanıcı Değiştir</li>
+                    <li id="logout-btn">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> 
+                        <span>Kullanıcı Değiştir</span>
+                    </li>
                 </ul>
             </nav>
         </aside>
@@ -66,11 +121,26 @@
             
             <!-- Gösterge Paneli -->
             <div id="dashboard-section">
-                <header>
-                    <h1>Araç Filosu Yönetimi</h1>
-                    <div class="stats">
-                        <div class="stat-box">Toplam Araç: <span id="total-cars">0</span></div>
-                        <div class="stat-box">Kiradaki Araçlar: <span id="rented-cars">0</span></div>
+                <header class="app-header">
+                    <div>
+                        <h1>Filo Operasyon Yönetimi</h1>
+                        <p class="header-desc">Araçların anlık kira durumlarını, kilometrelerini ve operasyonel notlarını yönetin.</p>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-total"><i class="fa-solid fa-cars"></i></div>
+                            <div class="stat-meta">
+                                <small>Kayıtlı Araç</small>
+                                <span id="total-cars">0</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-rented"><i class="fa-solid fa-key"></i></div>
+                            <div class="stat-meta">
+                                <small>Kirada Olanlar</small>
+                                <span id="rented-cars">0</span>
+                            </div>
+                        </div>
                     </div>
                 </header>
                 <div class="cars-grid" id="cars-container"></div>
@@ -78,14 +148,17 @@
 
             <!-- Aylık Tahsilat Sayfası -->
             <div id="revenue-section" style="display: none;">
-                <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <h1>Aylık Gelir & Gider Geçmişi</h1>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button id="export-excel-btn" class="btn-success" style="width: auto; padding: 10px 20px;">
-                            <i class="fa-solid fa-file-excel"></i> Excel'e Aktar
+                <header class="app-header">
+                    <div>
+                        <h1>Aylık Gelir & Gider Analitiği</h1>
+                        <p class="header-desc">Dönemsel kiralama gelirleri, aşım ücretleri ve şirket harcamalarının dökümü.</p>
+                    </div>
+                    <div class="action-btn-group">
+                        <button id="export-excel-btn" class="btn-secondary">
+                            <i class="fa-solid fa-file-excel"></i> Excel Çıktısı (.CSV)
                         </button>
-                        <button id="export-pdf-btn" class="btn-danger" style="width: auto; padding: 10px 20px; background-color: #dc2626;">
-                            <i class="fa-solid fa-file-pdf"></i> PDF İndir
+                        <button id="export-pdf-btn" class="btn-danger">
+                            <i class="fa-solid fa-file-pdf"></i> Resmi PDF Raporu
                         </button>
                     </div>
                 </header>
@@ -95,31 +168,34 @@
         </main>
     </div>
 
-    <div class="creator-tag">Created by Hüseyin Yiğit YEŞİL</div>
+    <div class="creator-tag">Developed for High-Performance Fleet Operations</div>
 
     <!-- Yeni Araç Ekleme Modalı -->
     <div class="modal" id="add-car-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-add-modal">&times;</span>
-            <h2>Yeni Araç Kaydet</h2>
+            <div class="modal-header-icon"><i class="fa-solid fa-car-side"></i></div>
+            <h2>Yeni Filo Aracı Kaydet</h2>
             <form id="add-car-form">
                 <div class="input-group">
-                    <label>Plaka</label>
+                    <label>Araç Plakası</label>
                     <input type="text" id="car-plate" required placeholder="Örn: 34 ABC 123" style="text-transform: uppercase;">
                 </div>
-                <div class="input-group">
-                    <label>Marka</label>
-                    <input type="text" id="car-brand" required placeholder="Örn: BMW">
-                </div>
-                <div class="input-group">
-                    <label>Model</label>
-                    <input type="text" id="car-model" required placeholder="Örn: 320i">
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Marka</label>
+                        <input type="text" id="car-brand" required placeholder="Örn: BMW">
+                    </div>
+                    <div class="input-group">
+                        <label>Model</label>
+                        <input type="text" id="car-model" required placeholder="Örn: 320i">
+                    </div>
                 </div>
                 <div class="input-group">
                     <label>Güncel Kilometre (KM)</label>
                     <input type="number" id="car-km" required placeholder="Örn: 45000">
                 </div>
-                <button type="submit" class="btn-primary">Aracı Kaydet</button>
+                <button type="submit" class="btn-primary"><i class="fa-solid fa-check"></i> Aracı Filoya Ekle</button>
             </form>
         </div>
     </div>
@@ -128,29 +204,32 @@
     <div class="modal" id="add-expense-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-expense-modal">&times;</span>
-            <h2>Yeni Gider Kaydet</h2>
+            <div class="modal-header-icon modal-danger"><i class="fa-solid fa-receipt"></i></div>
+            <h2>Operasyonel Masraf / Gider Kaydı</h2>
             <form id="add-expense-form">
                 <div class="input-group">
-                    <label>Gider Türü Seçimi</label>
+                    <label>Gider Kategorisi</label>
                     <select id="expense-type" required>
-                        <option value="">-- Lütfen Seçin --</option>
-                        <option value="Araç Bakım / Masraf">Araç Bakım / Masraf</option>
-                        <option value="Diğer">Diğer Giderler</option>
+                        <option value="">-- Kategori Seçiniz --</option>
+                        <option value="Araç Bakım / Masraf">Araç Bakım / Mekanik & Yedek Parça</option>
+                        <option value="Diğer">Genel Şirket & Operasyon Gideri</option>
                     </select>
                 </div>
-                <div class="input-group">
-                    <label>Tarih</label>
-                    <input type="date" id="expense-date" required>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Masraf Tarihi</label>
+                        <input type="date" id="expense-date" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Tutar (₺)</label>
+                        <input type="number" id="expense-amount" required placeholder="Örn: 2500">
+                    </div>
                 </div>
                 <div class="input-group">
-                    <label>Kime Yapıldı / Açıklama</label>
-                    <input type="text" id="expense-desc" required placeholder="Örn: Sanayi / Parça değişimi">
+                    <label>Kime / Nereye Ödendi (Açıklama)</label>
+                    <input type="text" id="expense-desc" required placeholder="Örn: Bosch Car Service - Periyodik Bakım">
                 </div>
-                <div class="input-group">
-                    <label>Tutar (₺)</label>
-                    <input type="number" id="expense-amount" required placeholder="Örn: 2500">
-                </div>
-                <button type="submit" class="btn-danger" style="background-color: var(--danger);">Gideri İşle</button>
+                <button type="submit" class="btn-danger"><i class="fa-solid fa-money-bill-wave"></i> Gideri Kasadan Düş</button>
             </form>
         </div>
     </div>
@@ -159,38 +238,43 @@
     <div class="modal" id="rent-car-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-rent-modal">&times;</span>
-            <h2>Araç Kirala</h2>
+            <div class="modal-header-icon modal-success"><i class="fa-solid fa-file-contract"></i></div>
+            <h2>Kiralama Sözleşmesi Başlat</h2>
             <form id="rent-car-form">
                 <input type="hidden" id="rent-car-id">
                 <div class="input-group">
-                    <label>Müşteri Adı Soyadı</label>
+                    <label>Müşteri Adı & Soyadı</label>
                     <input type="text" id="renter-name" required placeholder="Örn: Ahmet Yılmaz">
                 </div>
                 <div class="input-group">
-                    <label>İşlemi Yapan Personel</label>
-                    <input type="text" id="employee-name" readonly style="color: #94a3b8; background-color: rgba(255,255,255,0.05);">
+                    <label>İşlemi Yapan Görevli</label>
+                    <input type="text" id="employee-name" readonly class="input-readonly">
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Çıkış Tarihi</label>
+                        <input type="date" id="rent-date" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Beklenen Dönüş Tarihi</label>
+                        <input type="date" id="expected-return-date" required>
+                    </div>
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Günlük Kira Bedeli (₺)</label>
+                        <input type="number" id="daily-price" required placeholder="Örn: 1500">
+                    </div>
+                    <div class="input-group">
+                        <label>Çıkış Kilometresi</label>
+                        <input type="number" id="rent-km" required>
+                    </div>
                 </div>
                 <div class="input-group">
-                    <label>Kiralama Tarihi</label>
-                    <input type="date" id="rent-date" required>
+                    <label>Araç Notu / Ekspertiz Detayı</label>
+                    <input type="text" id="rent-notes" placeholder="Örn: Depo 4/4 dolu, stepne mevcut.">
                 </div>
-                <div class="input-group">
-                    <label>Beklenen Dönüş Tarihi</label>
-                    <input type="date" id="expected-return-date" required>
-                </div>
-                <div class="input-group">
-                    <label>Günlük Kiralama Bedeli (₺)</label>
-                    <input type="number" id="daily-price" required placeholder="Örn: 1500">
-                </div>
-                <div class="input-group">
-                    <label>Çıkış Kilometresi</label>
-                    <input type="number" id="rent-km" required>
-                </div>
-                <div class="input-group">
-                    <label>Araç Notu / Özel Durum</label>
-                    <input type="text" id="rent-notes" placeholder="Örn: Depo çeyrek verildi, ruhsat torpidoda">
-                </div>
-                <button type="submit" class="btn-success">Kiraya Ver</button>
+                <button type="submit" class="btn-success"><i class="fa-solid fa-key"></i> Kiraya Ver & Peşin Tahsil Et</button>
             </form>
         </div>
     </div>
@@ -199,39 +283,42 @@
     <div class="modal" id="edit-rental-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-edit-rental-modal">&times;</span>
-            <h2>Kiralama Bilgilerini Düzenle</h2>
+            <div class="modal-header-icon"><i class="fa-solid fa-sliders"></i></div>
+            <h2>Kiralama Parametrelerini Güncelle</h2>
             <form id="edit-rental-form">
                 <input type="hidden" id="edit-rental-car-id">
                 <div class="input-group">
                     <label>Müşteri Adı Soyadı</label>
                     <input type="text" id="edit-renter-name" required>
                 </div>
-                <div class="input-group">
-                    <label>Günlük Ücret (₺)</label>
-                    <input type="number" id="edit-daily-price" required>
-                </div>
-                <div class="input-group">
-                    <label>Yeni Beklenen Dönüş Tarihi (Uzatmak için tarihi ileri alın)</label>
-                    <input type="date" id="edit-expected-return-date" required>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Günlük Kira Ücreti (₺)</label>
+                        <input type="number" id="edit-daily-price" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Yeni Beklenen Dönüş</label>
+                        <input type="date" id="edit-expected-return-date" required>
+                    </div>
                 </div>
                 
-                <!-- Gün Uzatma ve Ek Ücret Bilgilendirme Kutusu -->
-                <div id="extension-info-box" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                    <p style="color: var(--warning); font-size: 13px; margin: 0; font-weight: 600;">
-                        ⏱️ Süre Uzatımı: <span id="extension-days-text">0</span> Gün Fazla<br>
-                        💰 Ekstra Alınması Gereken Ücret: <span id="extension-cost-text">0</span> ₺
-                    </p>
+                <div id="extension-info-box" class="extension-alert" style="display: none;">
+                    <div class="extension-alert-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <div>
+                        <strong>Kira Süresi Uzatıldı!</strong>
+                        <p>+<span id="extension-days-text">0</span> Gün Fazla | Ek Alınacak Tutar: <strong><span id="extension-cost-text">0</span> ₺</strong></p>
+                    </div>
                 </div>
 
                 <div class="input-group">
-                    <label>Çıkış Kilometresi</label>
+                    <label>Çıkış KM'si</label>
                     <input type="number" id="edit-rent-km" required>
                 </div>
                 <div class="input-group">
-                    <label>Not Defteri / Notlar</label>
+                    <label>Operasyon Not Defteri</label>
                     <input type="text" id="edit-rent-notes" placeholder="Not ekleyin...">
                 </div>
-                <button type="submit" class="btn-primary">Bilgileri Güncelle</button>
+                <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Değişiklikleri Kaydet</button>
             </form>
         </div>
     </div>
@@ -240,15 +327,19 @@
     <div class="modal" id="return-car-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-return-modal">&times;</span>
-            <h2>Aracı Teslim Al</h2>
+            <div class="modal-header-icon modal-warning"><i class="fa-solid fa-flag-checkered"></i></div>
+            <h2>Aracı Teslim Al & Kilometre Kapat</h2>
             <form id="return-car-form">
                 <input type="hidden" id="return-car-id">
-                <div class="input-group">
-                    <label>Dönüş Kilometresi</label>
-                    <input type="number" id="return-km" required placeholder="Yeni KM'yi giriniz">
+                <div class="info-banner">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Çıkış Kilometresi: <strong id="return-start-km">-</strong> KM</span>
                 </div>
-                <p class="info-text">Çıkış KM: <span id="return-start-km"></span></p>
-                <button type="submit" class="btn-warning">Teslim Al ve Güncelle</button>
+                <div class="input-group">
+                    <label>Dönüş Güncel Kilometresi</label>
+                    <input type="number" id="return-km" required placeholder="Araç sayacındaki KM...">
+                </div>
+                <button type="submit" class="btn-warning"><i class="fa-solid fa-calculator"></i> Hesapla & Teslim Al</button>
             </form>
         </div>
     </div>
@@ -257,14 +348,15 @@
     <div class="modal" id="edit-km-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-edit-km-modal">&times;</span>
-            <h2>Kilometre Güncelle</h2>
+            <div class="modal-header-icon"><i class="fa-solid fa-gauge-high"></i></div>
+            <h2>Manuel Kilometre Düzeltme</h2>
             <form id="edit-km-form">
                 <input type="hidden" id="edit-km-car-id">
                 <div class="input-group">
-                    <label>Yeni Kilometre (KM)</label>
-                    <input type="number" id="new-km-input" required placeholder="Yeni KM değerini girin">
+                    <label>Yeni Kilometre Değeri</label>
+                    <input type="number" id="new-km-input" required placeholder="Yeni KM">
                 </div>
-                <button type="submit" class="btn-primary">Güncelle</button>
+                <button type="submit" class="btn-primary"><i class="fa-solid fa-check"></i> KM Değerini Onayla</button>
             </form>
         </div>
     </div>
