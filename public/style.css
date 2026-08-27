@@ -1,26 +1,38 @@
 :root {
-    --bg-color: #0f172a;
-    --sidebar-bg: #1e293b;
-    --card-bg: #1e293b;
+    --bg-gradient: radial-gradient(circle at 10% 20%, #0f172a 0%, #090d16 90.2%);
+    --sidebar-bg: rgba(30, 41, 59, 0.7);
+    --card-bg: rgba(30, 41, 59, 0.6);
+    --card-hover-bg: rgba(51, 65, 85, 0.7);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
-    --primary: #3b82f6;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
+    
+    --primary-grad: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --primary-glow: rgba(59, 130, 246, 0.35);
+    
+    --success-grad: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --success-glow: rgba(16, 185, 129, 0.3);
+    
+    --warning-grad: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --warning-glow: rgba(245, 158, 11, 0.3);
+    
+    --danger-grad: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    --danger-glow: rgba(244, 63, 94, 0.3);
+    
+    --purple-grad: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 html, body {
-    background-color: var(--bg-color);
+    background: var(--bg-gradient);
     color: var(--text-main);
-    height: 100vh;
+    min-height: 100vh;
     overflow-x: hidden;
 }
 
@@ -37,39 +49,53 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 250px;
-    background-color: var(--sidebar-bg);
-    padding: 20px;
+    width: 270px;
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid #334155;
+    border-right: var(--glass-border);
     flex-shrink: 0;
 }
 
 .logo {
     display: flex;
     align-items: center;
-    font-size: 24px;
-    color: var(--primary);
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: 30px;
+    letter-spacing: -0.5px;
 }
-.logo h2 { margin-left: 10px; }
+.logo i {
+    -webkit-text-fill-color: #60a5fa;
+    margin-right: 12px;
+    font-size: 28px;
+}
 
-/* Kullanıcı Karşılama Alanı */
 .user-greeting {
     text-align: center;
     color: var(--text-muted);
     font-size: 13px;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #334155;
+    padding: 16px;
+    margin-bottom: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: var(--glass-border);
 }
 .user-greeting span {
     display: block;
     color: #fff;
     font-size: 16px;
     font-weight: 600;
-    margin-top: 5px;
+    margin-top: 6px;
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .sidebar nav {
@@ -87,28 +113,47 @@ body {
 }
 
 .sidebar nav ul li {
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.25s ease;
     color: var(--text-muted);
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.sidebar nav ul li:hover, .sidebar nav ul li.active {
-    background-color: var(--primary);
+.sidebar nav ul li i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar nav ul li:hover {
+    background: rgba(255, 255, 255, 0.05);
     color: #fff;
+    transform: translateX(4px);
+}
+
+.sidebar nav ul li.active {
+    background: var(--primary-grad);
+    color: #fff;
+    box-shadow: 0 4px 14px var(--primary-glow);
+    font-weight: 600;
 }
 
 .sidebar nav ul.logout-link li:hover {
-    background-color: rgba(239, 68, 68, 0.1);
-    color: var(--danger);
+    background: rgba(244, 63, 94, 0.15);
+    color: #fb7185;
 }
 
 /* Main Content */
 .main-content {
     flex: 1;
-    padding: 30px;
+    padding: 36px 44px;
     overflow-y: auto;
 }
 
@@ -116,52 +161,91 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 35px;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 20px;
+}
+
+header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
 .stats {
     display: flex;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
 .stat-box {
-    background-color: var(--sidebar-bg);
-    padding: 10px 20px;
-    border-radius: 8px;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    padding: 14px 22px;
+    border-radius: 12px;
     font-weight: 500;
-    border: 1px solid #334155;
+    border: var(--glass-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.stat-box span {
+    font-weight: 700;
+    font-size: 18px;
+    color: #60a5fa;
 }
 
 /* Grid & Cards */
 .cars-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
 }
 
 .car-card {
-    background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 24px;
+    border-radius: 16px;
+    border: var(--glass-border);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.car-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--purple-grad);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .car-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
+    background: var(--card-hover-bg);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.car-card:hover::before {
+    opacity: 1;
 }
 
 .car-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 15px;
+    margin-bottom: 18px;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .car-header-top {
@@ -171,59 +255,92 @@ header {
     align-items: center;
 }
 
-/* Plaka Tasarımı */
-.plate-number {
-    display: inline-block;
-    background-color: #f8fafc;
-    color: #0f172a;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 800;
-    font-size: 14px;
-    border-left: 10px solid #2563eb; 
-    letter-spacing: 1px;
-    border-right: 2px solid #cbd5e1;
-    border-top: 2px solid #cbd5e1;
-    border-bottom: 2px solid #cbd5e1;
-}
-
-.status-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+.car-header-top h3 {
+    font-size: 18px;
     font-weight: 600;
 }
 
-.status-available { background-color: rgba(16, 185, 129, 0.2); color: var(--success); }
-.status-rented { background-color: rgba(245, 158, 11, 0.2); color: var(--warning); }
+.plate-number {
+    display: inline-flex;
+    align-items: center;
+    background: #090d16;
+    color: #f8fafc;
+    padding: 4px 12px 4px 8px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.plate-number::before {
+    content: 'TR';
+    display: inline-block;
+    background: #2563eb;
+    color: #fff;
+    font-size: 9px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    margin-right: 8px;
+    font-weight: 900;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.status-available { 
+    background: rgba(16, 185, 129, 0.15); 
+    color: #34d399; 
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.status-rented { 
+    background: rgba(245, 158, 11, 0.15); 
+    color: #fbbf24; 
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
 
 .car-details p {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: 13.5px;
     display: flex;
     align-items: center;
 }
 
+.car-details p i {
+    width: 18px;
+    margin-right: 8px;
+    color: #60a5fa;
+}
+
 .car-details strong {
     color: var(--text-main);
-    margin-left: 5px;
+    margin-left: 6px;
+    font-weight: 600;
 }
 
 .edit-icon {
     margin-left: 10px;
-    color: var(--primary);
+    color: #38bdf8;
     cursor: pointer;
-    font-size: 14px;
-    transition: 0.3s;
+    font-size: 13px;
+    transition: 0.2s;
 }
 
 .edit-icon:hover {
     color: #fff;
+    transform: scale(1.15);
 }
 
 .card-actions {
-    margin-top: 20px;
+    margin-top: 22px;
     display: flex;
     gap: 10px;
 }
@@ -231,79 +348,118 @@ header {
 /* Buttons */
 button {
     width: 100%;
-    padding: 10px;
+    padding: 11px 18px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 13.5px;
     color: #fff;
-    transition: 0.3s;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-.btn-primary { background-color: var(--primary); }
-.btn-success { background-color: var(--success); }
-.btn-warning { background-color: var(--warning); }
-.btn-danger { background-color: var(--danger); }
+.btn-primary { 
+    background: var(--primary-grad); 
+    box-shadow: 0 4px 14px var(--primary-glow);
+}
+.btn-success { 
+    background: var(--success-grad); 
+    box-shadow: 0 4px 14px var(--success-glow);
+}
+.btn-warning { 
+    background: var(--warning-grad); 
+    box-shadow: 0 4px 14px var(--warning-glow);
+}
+.btn-danger { 
+    background: var(--danger-grad); 
+    box-shadow: 0 4px 14px var(--danger-glow);
+}
 
-button:hover { opacity: 0.8; }
+button:hover { 
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+button:active {
+    transform: translateY(0);
+}
 
 /* Modals */
 .modal {
     display: none;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(9, 13, 22, 0.75);
+    backdrop-filter: blur(8px);
     justify-content: center;
     align-items: center;
     z-index: 100;
-    padding: 15px;
+    padding: 20px;
 }
 
 .modal-content {
-    background-color: var(--card-bg);
-    padding: 30px;
-    border-radius: 12px;
+    background: #1e293b;
+    padding: 32px;
+    border-radius: 16px;
     width: 100%;
-    max-width: 400px;
-    border: 1px solid #334155;
+    max-width: 440px;
+    border: var(--glass-border);
     position: relative;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    animation: modalIn 0.25s ease-out;
+}
+
+@keyframes modalIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
 .close-btn {
     position: absolute;
-    top: 15px; right: 20px;
-    font-size: 24px;
+    top: 18px; right: 22px;
+    font-size: 22px;
     cursor: pointer;
     color: var(--text-muted);
+    transition: color 0.2s;
+}
+
+.close-btn:hover {
+    color: #fff;
 }
 
 .input-group {
-    margin-bottom: 20px;
-    margin-top: 15px;
+    margin-bottom: 18px;
 }
 
 .input-group label {
     display: block;
     margin-bottom: 8px;
-    font-size: 14px;
-    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    color: #cbd5e1;
 }
 
-.input-group input {
+.input-group input, .input-group select {
     width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #334155;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     background-color: #0f172a;
     color: white;
+    font-size: 14px;
     outline: none;
+    transition: all 0.2s ease;
 }
 
-.input-group input:focus {
-    border-color: var(--primary);
+.input-group input:focus, .input-group select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
 .info-text {
@@ -312,73 +468,74 @@ button:hover { opacity: 0.8; }
     margin-bottom: 15px;
 }
 
-/* Sağ Alt Köşe İmza Tasarımı */
 .creator-tag {
     position: fixed;
     bottom: 15px;
     right: 20px;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-muted);
-    opacity: 0.6;
+    opacity: 0.5;
     pointer-events: none;
     z-index: 1000;
+    letter-spacing: 0.5px;
 }
 
-/* Aylık Tahsilat Tasarımı */
+/* Gelir & Gider / Tahsilat Tasarımı */
 .revenue-list {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: 800px;
+    max-width: 900px;
 }
 
 .revenue-card {
-    background-color: var(--card-bg);
-    border-radius: 12px;
-    border: 1px solid #334155;
+    background: var(--card-bg);
+    backdrop-filter: blur(14px);
+    border-radius: 16px;
+    border: var(--glass-border);
     overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .revenue-card-header {
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 20px 25px;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 20px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #334155;
+    border-bottom: var(--glass-border);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
 }
 
 .revenue-month {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--text-main);
 }
 
 .revenue-total {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
-    color: var(--success);
 }
 
 .revenue-details-list {
-    padding: 15px 25px;
+    padding: 18px 28px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
 }
 
 .revenue-detail-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 12px;
-    border-bottom: 1px dashed #334155;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
     font-size: 14px;
     color: var(--text-muted);
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 8px;
 }
 
 .revenue-detail-item:last-child {
@@ -388,58 +545,56 @@ button:hover { opacity: 0.8; }
 
 .car-info span {
     color: var(--text-main);
-    font-weight: 500;
-    margin-right: 5px;
-}
-
-.car-income {
     font-weight: 600;
-    color: var(--primary);
 }
 
 /* Giriş Ekranı (Login Overlay) */
 .login-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-color: var(--bg-color);
+    background: radial-gradient(circle at 50% 50%, #1e293b 0%, #090d16 100%);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-    padding: 15px;
+    padding: 20px;
 }
 
 .login-box {
-    background-color: var(--card-bg);
-    padding: 40px;
-    border-radius: 12px;
-    border: 1px solid #334155;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(20px);
+    padding: 44px 36px;
+    border-radius: 20px;
+    border: var(--glass-border);
     text-align: center;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    max-width: 420px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
 }
 
 .user-buttons {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 14px;
 }
 
 .user-buttons button {
-    background-color: var(--sidebar-bg);
-    border: 1px solid #334155;
-    padding: 15px;
-    font-size: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: var(--glass-border);
+    padding: 16px;
+    font-size: 15px;
+    border-radius: 10px;
+    color: #e2e8f0;
 }
 
 .user-buttons button:hover {
-    background-color: var(--primary);
+    background: var(--primary-grad);
     color: #fff;
     transform: translateY(-2px);
+    box-shadow: 0 6px 18px var(--primary-glow);
 }
 
-/* Mobil Uyumlu Kesin Çözüm (@media) */
+/* Mobil Uyumlu Tasarım */
 @media screen and (max-width: 768px) {
     html, body {
         height: auto !important;
@@ -460,12 +615,13 @@ button:hover { opacity: 0.8; }
         height: auto !important;
         position: relative !important;
         border-right: none;
-        border-bottom: 1px solid #334155;
+        border-bottom: var(--glass-border);
+        padding: 20px;
     }
 
     .main-content {
         width: 100% !important;
-        padding: 15px !important;
+        padding: 20px !important;
         overflow-y: visible !important;
     }
 
@@ -474,7 +630,40 @@ button:hover { opacity: 0.8; }
         bottom: auto !important;
         right: auto !important;
         text-align: center;
-        padding: 20px 0;
+        padding: 24px 0;
         pointer-events: auto;
+    }
+}
+
+/* PDF / Yazdırma Modu */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    .sidebar, .creator-tag, header button, .card-actions, #export-excel-btn, #export-pdf-btn, .modal, .login-overlay, button {
+        display: none !important;
+    }
+    .main-content {
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    #revenue-section {
+        display: block !important;
+    }
+    .revenue-card {
+        border: 1px solid #cbd5e1 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        margin-bottom: 20px !important;
+        page-break-inside: avoid;
+    }
+    .revenue-card-header {
+        background: #f1f5f9 !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+    }
+    .revenue-month, .revenue-total, .revenue-detail-item, .car-info span, .car-income {
+        color: #0f172a !important;
     }
 }

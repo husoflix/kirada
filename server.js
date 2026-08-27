@@ -15,7 +15,6 @@ const db = createClient({
     authToken: process.env.TURSO_AUTH_TOKEN,
 });
 
-// Veritabanı tablolarını otomatik oluştur (Garanti olsun)
 async function initDB() {
     try {
         await db.execute(`
@@ -31,9 +30,14 @@ async function initDB() {
                 renterName TEXT,
                 employeeName TEXT,
                 dailyPrice INTEGER,
-                startKm INTEGER
+                startKm INTEGER,
+                notes TEXT
             )
         `);
+        try {
+            await db.execute(`ALTER TABLE cars ADD COLUMN notes TEXT`);
+        } catch (e) {}
+
         await db.execute(`
             CREATE TABLE IF NOT EXISTS revenue (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,7 +52,6 @@ async function initDB() {
 }
 initDB();
 
-// Tüm araçları getir
 app.get('/api/cars', async (req, res) => {
     try {
         const result = await db.execute("SELECT * FROM cars");
@@ -59,7 +62,6 @@ app.get('/api/cars', async (req, res) => {
     }
 });
 
-// Araçları kaydet / güncelle
 app.post('/api/cars/save', async (req, res) => {
     const cars = req.body;
     try {
@@ -67,8 +69,8 @@ app.post('/api/cars/save', async (req, res) => {
         if (Array.isArray(cars)) {
             for (let car of cars) {
                 await db.execute({
-                    sql: `INSERT INTO cars (id, plate, brand, model, km, status, rentDate, expectedReturnDate, renterName, employeeName, dailyPrice, startKm) 
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    sql: `INSERT INTO cars (id, plate, brand, model, km, status, rentDate, expectedReturnDate, renterName, employeeName, dailyPrice, startKm, notes) 
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     args: [
                         car.id || '',
                         car.plate || '',
@@ -81,7 +83,8 @@ app.post('/api/cars/save', async (req, res) => {
                         car.renterName || null,
                         car.employeeName || null,
                         car.dailyPrice || null,
-                        car.startKm || null
+                        car.startKm || null,
+                        car.notes || ''
                     ]
                 });
             }
@@ -93,7 +96,6 @@ app.post('/api/cars/save', async (req, res) => {
     }
 });
 
-// Tahsilat geçmişini getir
 app.get('/api/revenue', async (req, res) => {
     try {
         const result = await db.execute("SELECT * FROM revenue");
@@ -112,7 +114,6 @@ app.get('/api/revenue', async (req, res) => {
     }
 });
 
-// Tahsilat geçmişini kaydet
 app.post('/api/revenue/save', async (req, res) => {
     const revenueData = req.body;
     try {
