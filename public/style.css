@@ -10,7 +10,6 @@
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
 
-    /* Brand & Accent Gradients */
     --accent-blue: #38bdf8;
     --accent-indigo: #6366f1;
     --primary-grad: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
@@ -328,7 +327,6 @@ body {
     color: #fff;
 }
 
-/* Standart TR Plaka Tasarımı */
 .plate-number {
     display: inline-flex;
     align-items: center;
@@ -587,7 +585,7 @@ button:hover {
     margin-top: 2px;
 }
 
-/* Giriş Ekranı (Login Screen) */
+/* Giriş Ekranı */
 .login-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -711,12 +709,13 @@ button:hover {
     letter-spacing: 0.5px;
 }
 
-/* Revenue Page List */
+/* 2 Sütunlu Bilanço Tasarımı */
 .revenue-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    max-width: 950px;
+    gap: 24px;
+    width: 100%;
+    max-width: 1200px;
 }
 
 .revenue-card {
@@ -724,31 +723,105 @@ button:hover {
     border: 1px solid var(--border-subtle);
     border-radius: 18px;
     overflow: hidden;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
 }
 
 .revenue-card-header {
-    background: rgba(0, 0, 0, 0.25);
+    background: rgba(0, 0, 0, 0.35);
     padding: 20px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--border-subtle);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 16px;
 }
 
 .revenue-month {
-    font-size: 17px;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+
+.revenue-summary-badges {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.badge-income {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
     font-weight: 700;
 }
 
-.revenue-total {
-    font-size: 18px;
+.badge-expense {
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: #fb7185;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+}
+
+.badge-net {
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #38bdf8;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 14px;
     font-weight: 800;
 }
 
-.revenue-details-list {
-    padding: 16px 28px;
+.revenue-columns-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px 28px;
+}
+
+.revenue-column {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.column-header-income {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #34d399;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    margin-bottom: 14px;
+}
+
+.column-header-expense {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #fb7185;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(244, 63, 94, 0.2);
+    margin-bottom: 14px;
+}
+
+.column-items-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -762,8 +835,7 @@ button:hover {
     border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
     font-size: 13.5px;
     color: var(--text-secondary);
-    flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
 }
 
 .revenue-detail-item:last-child {
@@ -776,8 +848,16 @@ button:hover {
     font-weight: 700;
 }
 
+.empty-col-msg {
+    color: var(--text-muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 20px 0;
+    font-style: italic;
+}
+
 /* Mobil Responsive */
-@media screen and (max-width: 820px) {
+@media screen and (max-width: 860px) {
     body { flex-direction: column; }
     .container { flex-direction: column; }
     .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-subtle); }
@@ -785,9 +865,14 @@ button:hover {
     .stats-grid { width: 100%; }
     .stat-card { flex: 1; }
     .action-btn-group { width: 100%; display: flex; flex-direction: column; }
+    .revenue-columns-grid {
+        grid-template-columns: 1fr;
+        padding: 18px;
+        gap: 18px;
+    }
 }
 
-/* PDF Print Modu */
+/* PDF Print */
 @media print {
     body { background: #fff !important; color: #000 !important; }
     .sidebar, .creator-tag, header button, .card-actions, #export-excel-btn, #export-pdf-btn, .modal, .login-overlay, button { display: none !important; }
@@ -795,5 +880,5 @@ button:hover {
     #revenue-section { display: block !important; }
     .revenue-card { border: 1px solid #cbd5e1 !important; background: #fff !important; box-shadow: none !important; margin-bottom: 20px !important; }
     .revenue-card-header { background: #f8fafc !important; color: #000 !important; border-bottom: 1px solid #cbd5e1 !important; }
-    .revenue-month, .revenue-total, .revenue-detail-item, .car-info span, .car-income { color: #000 !important; }
+    .revenue-month, .badge-income, .badge-expense, .badge-net, .revenue-detail-item, .car-info span { color: #000 !important; background: none !important; border: none !important; }
 }

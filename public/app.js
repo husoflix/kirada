@@ -271,7 +271,7 @@ function updateStats() {
     if (rentedCarsEl) rentedCarsEl.innerText = cars.filter(c => c.status === 'rented').length;
 }
 
-// --- AYLIK GELİR/GİDER GÖSTERME ---
+// --- AYLIK GELİR/GİDER GÖSTERME (SOL GELİR - SAĞ GİDER AYRI SÜTUN) ---
 function renderRevenue() {
     const container = document.getElementById('revenue-container');
     if (!container) return;
@@ -280,8 +280,8 @@ function renderRevenue() {
 
     const sortedKeys = Object.keys(revenueData).sort((a, b) => b.localeCompare(a));
 
-    if(sortedKeys.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted);">Henüz bir işlem kaydı bulunmuyor.</p>';
+    if (sortedKeys.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 30px;">Henüz bir işlem kaydı bulunmuyor.</p>';
         return;
     }
 
@@ -292,65 +292,102 @@ function renderRevenue() {
         const [year, month] = key.split('-');
         const monthName = months[parseInt(month) - 1];
 
-        let detailsHtml = '';
+        let totalIncome = 0;
+        let totalExpense = 0;
+
+        let incomeHtml = '';
+        let expenseHtml = '';
+
         if (monthData.details && monthData.details.length > 0) {
             monthData.details.forEach((detail, index) => {
                 const isExpense = detail.type === 'expense';
-                let amountColor = isExpense ? '#f43f5e' : '#10b981';
-                let sign = isExpense ? '-' : '+';
-                let employeeText = detail.employee ? `Personel: ${detail.employee}` : '';
-                let detailSubText = '';
+                const employeeText = detail.employee ? `Personel: ${detail.employee}` : '';
+                
+                const deleteRevBtn = isAdmin 
+                    ? `<button onclick="deleteRevenueItem('${key}', ${index})" style="background:none; border:none; color:#f43f5e; cursor:pointer; margin-left:8px; width:auto; padding:4px;" title="Kaydı Sil"><i class="fa-solid fa-trash"></i></button>`
+                    : '';
 
                 if (isExpense) {
-                    detailSubText = `<small style="color: var(--text-muted);">(Ödenen Kişi/Yer: ${detail.renter} | Ekleyen: ${detail.employee})</small>`;
+                    totalExpense += detail.amount;
+                    expenseHtml += `
+                        <div class="revenue-detail-item">
+                            <div class="car-info">
+                                <i class="fa-solid fa-receipt" style="color:#f43f5e;"></i> <span>${detail.carName}</span><br>
+                                <small style="color: var(--text-muted);">(Kime/Nereye: ${detail.renter} | Ekleyen: ${detail.employee})</small>
+                                <br><small style="color: var(--text-muted); font-size: 11px;">Tarih: ${detail.date}</small>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <div style="color: #f43f5e; font-weight: 800; font-size: 14.5px;">
+                                    - ${detail.amount.toLocaleString('tr-TR')} ₺
+                                </div>
+                                ${deleteRevBtn}
+                            </div>
+                        </div>
+                    `;
                 } else {
+                    totalIncome += detail.amount;
                     let kmInfoText = `Toplam Yol: ${detail.distanceTraveled || 0} KM`;
                     if (detail.extraKm && detail.extraKm > 0) {
                         kmInfoText += ` <span style="color: #fbbf24; font-weight: 700;">(⚠️ ${detail.extraKm} KM Aşım)</span>`;
                     } else if (detail.distanceTraveled !== undefined && detail.distanceTraveled !== '-') {
                         kmInfoText += ` <span style="color: #34d399;">(Sınır İçinde)</span>`;
                     } else {
-                        kmInfoText = 'Peşin Tahsilat';
+                        kmInfoText = 'Peşin Kiralama';
                     }
-                    detailSubText = `<small style="color: var(--text-muted);">(Müşteri: ${detail.renter}, ${employeeText}, ${detail.days} Gün) | ${kmInfoText}</small>`;
-                }
-                
-                let deleteRevBtn = isAdmin 
-                    ? `<button onclick="deleteRevenueItem('${key}', ${index})" style="background:none; border:none; color:#f43f5e; cursor:pointer; margin-left:10px; width:auto; padding:4px;" title="Kaydı Sil"><i class="fa-solid fa-trash"></i></button>`
-                    : '';
 
-                let iconHtml = isExpense ? `<i class="fa-solid fa-receipt" style="color:#f43f5e;"></i>` : `<i class="fa-solid fa-car-side" style="color:#10b981;"></i>`;
-
-                detailsHtml += `
-                    <div class="revenue-detail-item">
-                        <div class="car-info">
-                            ${iconHtml} <span>${detail.carName}</span><br>
-                            ${detailSubText}
-                            <br><small style="color: var(--text-muted); font-size: 11px;">Tarih: ${detail.date}</small>
-                        </div>
-                        <div style="display: flex; align-items: center;">
-                            <div class="car-income" style="color: ${amountColor}; font-weight: 800; font-size: 15px;">
-                                ${sign} ${detail.amount.toLocaleString('tr-TR')} ₺
+                    incomeHtml += `
+                        <div class="revenue-detail-item">
+                            <div class="car-info">
+                                <i class="fa-solid fa-car-side" style="color:#10b981;"></i> <span>${detail.carName}</span><br>
+                                <small style="color: var(--text-muted);">(Müşteri: ${detail.renter}, ${employeeText}, ${detail.days} Gün) | ${kmInfoText}</small>
+                                <br><small style="color: var(--text-muted); font-size: 11px;">Tarih: ${detail.date}</small>
                             </div>
-                            ${deleteRevBtn}
+                            <div style="display: flex; align-items: center;">
+                                <div style="color: #10b981; font-weight: 800; font-size: 14.5px;">
+                                    + ${detail.amount.toLocaleString('tr-TR')} ₺
+                                </div>
+                                ${deleteRevBtn}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             });
-        } else {
-            detailsHtml = `<div class="revenue-detail-item" style="justify-content:center;">Detay bulunamadı.</div>`;
         }
 
-        let netTotalColor = monthData.total < 0 ? '#f43f5e' : '#10b981';
+        const netBalance = totalIncome - totalExpense;
+        const netColor = netBalance >= 0 ? '#34d399' : '#f43f5e';
+        const netSign = netBalance >= 0 ? '+' : '';
 
         htmlContent += `
             <div class="revenue-card">
                 <div class="revenue-card-header">
                     <div class="revenue-month">${monthName} ${year} Özeti</div>
-                    <div class="revenue-total" style="color: ${netTotalColor};">Net Durum: ${monthData.total.toLocaleString('tr-TR')} ₺</div>
+                    <div class="revenue-summary-badges">
+                        <div class="badge-income">Gelir: +${totalIncome.toLocaleString('tr-TR')} ₺</div>
+                        <div class="badge-expense">Gider: -${totalExpense.toLocaleString('tr-TR')} ₺</div>
+                        <div class="badge-net" style="color: ${netColor};">Net Durum: ${netSign}${netBalance.toLocaleString('tr-TR')} ₺</div>
+                    </div>
                 </div>
-                <div class="revenue-details-list">
-                    ${detailsHtml}
+                <div class="revenue-columns-grid">
+                    <!-- Sol: Gelirler -->
+                    <div class="revenue-column">
+                        <div class="column-header-income">
+                            <i class="fa-solid fa-arrow-down-left"></i> Gelir Kayıtları (+${totalIncome.toLocaleString('tr-TR')} ₺)
+                        </div>
+                        <div class="column-items-list">
+                            ${incomeHtml || '<div class="empty-col-msg">Bu ay için gelir kaydı yok.</div>'}
+                        </div>
+                    </div>
+
+                    <!-- Sağ: Giderler -->
+                    <div class="revenue-column">
+                        <div class="column-header-expense">
+                            <i class="fa-solid fa-arrow-up-right"></i> Masraf & Giderler (-${totalExpense.toLocaleString('tr-TR')} ₺)
+                        </div>
+                        <div class="column-items-list">
+                            ${expenseHtml || '<div class="empty-col-msg">Bu ay için gider kaydı yok.</div>'}
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
