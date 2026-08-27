@@ -95,8 +95,8 @@
                         <i class="fa-solid fa-chart-line-up"></i> 
                         <span>Aylık Tahsilat & Bilanço</span>
                     </li>
-                    <!-- Sadece Yönetici Görür -->
-                    <li id="nav-add-expense" style="display: none;">
+                    <!-- Tüm Kullanıcılara Açık Gider Menüsü -->
+                    <li id="nav-add-expense">
                         <i class="fa-solid fa-receipt"></i> 
                         <span>Gider / Masraf Ekle</span>
                     </li>
@@ -169,7 +169,8 @@
         </main>
     </div>
 
-    <div class="creator-tag">Developed for High-Performance Fleet Operations</div>
+    <!-- Güncellenen İmza -->
+    <div class="creator-tag">Created by Hüseyin Yiğit YEŞİL</div>
 
     <!-- Yeni Araç Ekleme Modalı (Admin) -->
     <div class="modal" id="add-car-modal">
@@ -201,7 +202,7 @@
         </div>
     </div>
 
-    <!-- Gider Ekleme Modalı (Admin) -->
+    <!-- Gider Ekleme Modalı (Tüm Personel) -->
     <div class="modal" id="add-expense-modal">
         <div class="modal-content">
             <span class="close-btn" id="close-expense-modal">&times;</span>
@@ -291,7 +292,6 @@
                     </select>
                 </div>
 
-                <!-- Aşım varsa açılacak dinamik alan -->
                 <div id="manual-overage-container" style="display: none; background: rgba(245, 158, 11, 0.08); border: 1px dashed rgba(245, 158, 11, 0.3); padding: 14px; border-radius: 10px; margin-bottom: 16px;">
                     <div class="input-row">
                         <div class="input-group" style="margin-bottom: 0;">

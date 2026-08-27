@@ -56,7 +56,9 @@ function initApp() {
         
         // Sadece Admin (Egemen Akbulut) görebilir
         if (navAddCar) navAddCar.style.display = isAdmin ? 'flex' : 'none';
-        if (navAddExpense) navAddExpense.style.display = isAdmin ? 'flex' : 'none';
+        
+        // Gider menüsünü bütün kullanıcılar görebilir
+        if (navAddExpense) navAddExpense.style.display = 'flex';
 
         checkOverdueCars();
     }
@@ -470,7 +472,6 @@ if (closeManualRevBtn) {
     });
 }
 
-// Araç seçildiğinde KM'sini otomatik getir
 const manualCarSelectEl = document.getElementById('manual-car-select');
 if (manualCarSelectEl) {
     manualCarSelectEl.addEventListener('change', (e) => {
@@ -481,7 +482,6 @@ if (manualCarSelectEl) {
     });
 }
 
-// Aşım var mı seçimi değiştiğinde
 const manualHasOverageEl = document.getElementById('manual-has-km-overage');
 if (manualHasOverageEl) {
     manualHasOverageEl.addEventListener('change', (e) => {
@@ -614,11 +614,10 @@ if (addCarForm) {
     });
 }
 
-// --- GİDER EKLEME İŞLEMLERİ (Admin) ---
+// --- GİDER EKLEME İŞLEMLERİ (TÜM PERSONEL EKLER) ---
 const navAddExpenseBtn = document.getElementById('nav-add-expense');
 if (navAddExpenseBtn) {
     navAddExpenseBtn.addEventListener('click', () => {
-        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
         if (addExpenseModal) {
             document.getElementById('expense-date').valueAsDate = new Date();
             addExpenseModal.style.display = 'flex';
@@ -636,7 +635,6 @@ const addExpenseForm = document.getElementById('add-expense-form');
 if (addExpenseForm) {
     addExpenseForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (!isAdmin) return alert("Bu işlem için yetkiniz yok!");
 
         const type = document.getElementById('expense-type').value;
         const dateStr = document.getElementById('expense-date').value;
