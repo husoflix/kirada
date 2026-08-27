@@ -53,8 +53,8 @@ function initApp() {
         if (loginScreen) loginScreen.style.display = 'none';
         if (loggedInUserEl) loggedInUserEl.innerText = currentUser;
         
-        if (navAddCar) navAddCar.style.display = isAdmin ? 'block' : 'none';
-        if (navAddExpense) navAddExpense.style.display = 'block';
+        if (navAddCar) navAddCar.style.display = isAdmin ? 'flex' : 'none';
+        if (navAddExpense) navAddExpense.style.display = 'flex';
 
         checkOverdueCars();
     }
@@ -218,8 +218,8 @@ function renderCars() {
             `;
             if (car.notes) {
                 notesHtml = `
-                    <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; margin-top: 8px; font-size: 12px; border-left: 3px solid var(--warning);">
-                        <i class="fa-solid fa-note-sticky" style="color: var(--warning); margin-right: 5px;"></i> <strong>Not:</strong> ${car.notes}
+                    <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; margin-top: 8px; font-size: 12px; border-left: 3px solid var(--warning);">
+                        <i class="fa-solid fa-note-sticky" style="color: #fbbf24; margin-right: 5px;"></i> <strong>Not:</strong> ${car.notes}
                     </div>
                 `;
             }
@@ -255,8 +255,8 @@ function renderCars() {
             </div>
             <div class="card-actions">
                 ${isAvailable 
-                    ? `<button class="btn-success" onclick="openRentModal('${car.id}')">Kirala</button>`
-                    : `<button class="btn-warning" onclick="openReturnModal('${car.id}')">Teslim Al</button>`
+                    ? `<button class="btn-success" onclick="openRentModal('${car.id}')"><i class="fa-solid fa-key"></i> Kirala</button>`
+                    : `<button class="btn-warning" onclick="openReturnModal('${car.id}')"><i class="fa-solid fa-flag-checkered"></i> Teslim Al</button>`
                 }
                 ${editRentalBtn}
                 ${deleteButtonHtml}
@@ -296,7 +296,7 @@ function renderRevenue() {
         if (monthData.details && monthData.details.length > 0) {
             monthData.details.forEach((detail, index) => {
                 const isExpense = detail.type === 'expense';
-                let amountColor = isExpense ? 'var(--danger)' : 'var(--success)';
+                let amountColor = isExpense ? '#f43f5e' : '#10b981';
                 let sign = isExpense ? '-' : '+';
                 let employeeText = detail.employee ? `Personel: ${detail.employee}` : '';
                 let detailSubText = '';
@@ -306,9 +306,9 @@ function renderRevenue() {
                 } else {
                     let kmInfoText = `Toplam Yol: ${detail.distanceTraveled || 0} KM`;
                     if (detail.extraKm && detail.extraKm > 0) {
-                        kmInfoText += ` <span style="color: var(--warning); font-weight: 600;">(⚠️ ${detail.extraKm} KM Aşım)</span>`;
+                        kmInfoText += ` <span style="color: #fbbf24; font-weight: 700;">(⚠️ ${detail.extraKm} KM Aşım)</span>`;
                     } else if (detail.distanceTraveled !== undefined && detail.distanceTraveled !== '-') {
-                        kmInfoText += ` <span style="color: var(--success);">(Sınır İçinde)</span>`;
+                        kmInfoText += ` <span style="color: #34d399;">(Sınır İçinde)</span>`;
                     } else {
                         kmInfoText = 'Peşin Tahsilat';
                     }
@@ -316,20 +316,20 @@ function renderRevenue() {
                 }
                 
                 let deleteRevBtn = isAdmin 
-                    ? `<button onclick="deleteRevenueItem('${key}', ${index})" style="background:none; border:none; color:var(--danger); cursor:pointer; margin-left:10px;" title="Kaydı Sil"><i class="fa-solid fa-trash"></i></button>`
+                    ? `<button onclick="deleteRevenueItem('${key}', ${index})" style="background:none; border:none; color:#f43f5e; cursor:pointer; margin-left:10px; width:auto; padding:4px;" title="Kaydı Sil"><i class="fa-solid fa-trash"></i></button>`
                     : '';
 
-                let iconHtml = isExpense ? `<i class="fa-solid fa-money-bill-transfer" style="color:var(--danger);"></i>` : `<i class="fa-solid fa-car" style="color:var(--success);"></i>`;
+                let iconHtml = isExpense ? `<i class="fa-solid fa-receipt" style="color:#f43f5e;"></i>` : `<i class="fa-solid fa-car-side" style="color:#10b981;"></i>`;
 
                 detailsHtml += `
-                    <div class="revenue-detail-item" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div class="revenue-detail-item">
                         <div class="car-info">
                             ${iconHtml} <span>${detail.carName}</span><br>
                             ${detailSubText}
-                            <br><small style="color: #64748b; font-size: 11px;">Tarih: ${detail.date}</small>
+                            <br><small style="color: var(--text-muted); font-size: 11px;">Tarih: ${detail.date}</small>
                         </div>
                         <div style="display: flex; align-items: center;">
-                            <div class="car-income" style="color: ${amountColor}; font-weight: bold; font-size: 16px;">
+                            <div class="car-income" style="color: ${amountColor}; font-weight: 800; font-size: 15px;">
                                 ${sign} ${detail.amount.toLocaleString('tr-TR')} ₺
                             </div>
                             ${deleteRevBtn}
@@ -341,7 +341,7 @@ function renderRevenue() {
             detailsHtml = `<div class="revenue-detail-item" style="justify-content:center;">Detay bulunamadı.</div>`;
         }
 
-        let netTotalColor = monthData.total < 0 ? 'var(--danger)' : 'var(--success)';
+        let netTotalColor = monthData.total < 0 ? '#f43f5e' : '#10b981';
 
         htmlContent += `
             <div class="revenue-card">
@@ -637,7 +637,7 @@ function calculateExtensionCost() {
         const extraCost = diffDays * dailyPrice;
         if (daysText) daysText.innerText = diffDays;
         if (costText) costText.innerText = extraCost.toLocaleString('tr-TR');
-        if (infoBox) infoBox.style.display = 'block';
+        if (infoBox) infoBox.style.display = 'flex';
         return extraCost;
     } else {
         if (infoBox) infoBox.style.display = 'none';
@@ -778,7 +778,7 @@ if (returnKmInput) {
                 div.className = 'input-group';
                 div.id = 'extra-km-price-group';
                 div.innerHTML = `
-                    <label style="color: var(--warning);">⚠️ KM Aşımı Tespit Edildi! (${distanceTraveled - allowedKm} KM fazla). Birim Ücret (₺/KM)</label>
+                    <label style="color: #fbbf24;">⚠️ KM Aşımı Tespit Edildi! (${distanceTraveled - allowedKm} KM fazla). Birim Ücret (₺/KM)</label>
                     <input type="number" id="extra-km-price" required value="5" placeholder="Örn: 5">
                 `;
                 form.insertBefore(div, form.querySelector('button'));
@@ -905,18 +905,61 @@ window.deleteRevenueItem = function(monthKey, index) {
     }
 };
 
-// --- EXCEL'E AKTAR İŞLEMİ ---
+// --- EXCEL'E AKTAR İŞLEMİ (TÜRKÇE KARAKTER UYUMLU .XLS) ---
 const exportExcelBtn = document.getElementById('export-excel-btn');
 if (exportExcelBtn) {
     exportExcelBtn.addEventListener('click', () => {
-        if(Object.keys(revenueData).length === 0) {
+        if (Object.keys(revenueData).length === 0) {
             alert("Dışa aktarılacak işlem verisi bulunmuyor.");
             return;
         }
 
-        let csvContent = "Ay/Yıl;İşlem Türü;Araç/Açıklama;Müşteri/Firma;Personel;Süre (Gün);Toplam Yol (KM);Aşan KM;Tutar (TL);Tarih\n";
         const months = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
         const sortedKeys = Object.keys(revenueData).sort((a, b) => b.localeCompare(a));
+
+        let excelTable = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <!--[if gte mso 9]>
+            <xml>
+                <x:ExcelWorkbook>
+                    <x:ExcelWorksheets>
+                        <x:ExcelWorksheet>
+                            <x:Name>Tahsilat_Raporu</x:Name>
+                            <x:WorksheetOptions>
+                                <x:DisplayGridlines/>
+                            </x:WorksheetOptions>
+                        </x:ExcelWorksheet>
+                    </x:ExcelWorksheets>
+                </x:ExcelWorkbook>
+            </xml>
+            <![endif]-->
+            <style>
+                th { background-color: #1e293b; color: #ffffff; font-weight: bold; border: 1px solid #cbd5e1; }
+                td { border: 1px solid #cbd5e1; mso-number-format:"\\@"; }
+                .gelir { color: #059669; font-weight: bold; }
+                .gider { color: #dc2626; font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Ay / Yıl</th>
+                        <th>İşlem Türü</th>
+                        <th>Araç / Açıklama</th>
+                        <th>Müşteri / Firma</th>
+                        <th>Personel</th>
+                        <th>Süre (Gün)</th>
+                        <th>Toplam Yol (KM)</th>
+                        <th>Aşan KM</th>
+                        <th>Tutar (TL)</th>
+                        <th>İşlem Tarihi</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
 
         sortedKeys.forEach(key => {
             const monthData = revenueData[key];
@@ -925,30 +968,52 @@ if (exportExcelBtn) {
 
             if (monthData.details && monthData.details.length > 0) {
                 monthData.details.forEach(detail => {
-                    let typeStr = detail.type === 'expense' ? '"GİDER"' : '"GELİR"';
-                    let sign = detail.type === 'expense' ? '-' : '';
-                    let car = `"${detail.carName || ''}"`;
-                    let renter = `"${detail.renter || ''}"`;
-                    let employee = `"${detail.employee || ''}"`;
-                    let days = detail.days;
-                    let distance = detail.distanceTraveled || '-';
-                    let extraKm = detail.extraKm || '-';
-                    let amount = `"${sign}${detail.amount}"`;
-                    let date = `"${detail.date || ''}"`;
+                    const isExpense = detail.type === 'expense';
+                    const typeStr = isExpense ? 'GİDER' : 'GELİR';
+                    const amountClass = isExpense ? 'gider' : 'gelir';
+                    const sign = isExpense ? '-' : '+';
+                    
+                    const car = detail.carName || '-';
+                    const renter = detail.renter || '-';
+                    const employee = detail.employee || '-';
+                    const days = detail.days || '-';
+                    const distance = detail.distanceTraveled !== undefined ? detail.distanceTraveled : '-';
+                    const extraKm = detail.extraKm !== undefined ? detail.extraKm : '-';
+                    const amount = `${sign}${detail.amount.toLocaleString('tr-TR')} ₺`;
+                    const date = detail.date || '-';
 
-                    csvContent += `${monthName};${typeStr};${car};${renter};${employee};${days};${distance};${extraKm};${amount};${date}\n`;
+                    excelTable += `
+                        <tr>
+                            <td>${monthName}</td>
+                            <td class="${amountClass}">${typeStr}</td>
+                            <td>${car}</td>
+                            <td>${renter}</td>
+                            <td>${employee}</td>
+                            <td align="center">${days}</td>
+                            <td align="center">${distance}</td>
+                            <td align="center">${extraKm}</td>
+                            <td class="${amountClass}" align="right">${amount}</td>
+                            <td align="center">${date}</td>
+                        </tr>
+                    `;
                 });
             }
         });
 
-        const bom = "\uFEFF";
-        const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+        excelTable += `
+                </tbody>
+            </table>
+        </body>
+        </html>
+        `;
+
+        const blob = new Blob([excelTable], { type: 'application/vnd.ms-excel;charset=utf-8' });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
         
         const todayStr = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
-        link.setAttribute("download", `Gelir_Gider_Raporu_${todayStr}.csv`);
+        link.setAttribute("download", `Gelir_Gider_Raporu_${todayStr}.xls`);
         
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
@@ -961,7 +1026,7 @@ if (exportExcelBtn) {
 const exportPdfBtn = document.getElementById('export-pdf-btn');
 if (exportPdfBtn) {
     exportPdfBtn.addEventListener('click', () => {
-        if(Object.keys(revenueData).length === 0) {
+        if (Object.keys(revenueData).length === 0) {
             alert("Dışa aktarılacak işlem verisi bulunmuyor.");
             return;
         }
