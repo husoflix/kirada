@@ -73,8 +73,8 @@ function checkOverdueCars() {
     const todayCars = [];
 
     cars.filter(c => c.status === 'rented' && c.expectedReturnDate).forEach(car => {
-        const expDate = new Date(car.expectedReturnDate);
-        expDate.setHours(0, 0, 0, 0);
+        const [eY, eM, eD] = car.expectedReturnDate.split('-').map(Number);
+        const expDate = new Date(eY, eM - 1, eD);
 
         if (expDate < today) {
             overdueCars.push(`${car.brand} ${car.model} (${car.plate || 'Plakasız'}) - Müşteri: ${car.renterName} (Beklenen: ${car.expectedReturnDate})`);
@@ -93,6 +93,31 @@ function checkOverdueCars() {
         }
         setTimeout(() => alert(msg), 300);
     }
+}
+
+// --- TOPLAM KİRALAMA GÜNÜNÜ DİNAMİK VE DOĞRU HESAPLAMA ---
+function calculateTotalDays(rentDateStr, expectedDateStr) {
+    if (!rentDateStr) return 1;
+    
+    const [rY, rM, rD] = rentDateStr.split('-').map(Number);
+    const startDate = new Date(rY, rM - 1, rD);
+
+    let endDate = new Date();
+    endDate.setHours(0, 0, 0, 0);
+
+    // Sözleşmedeki uzatılmış tarih varsa onu al
+    if (expectedDateStr) {
+        const [eY, eM, eD] = expectedDateStr.split('-').map(Number);
+        const expDate = new Date(eY, eM - 1, eD);
+        // Eğer uzatılan tarih bugünden sonraysa veya eşitse sözleşme gününü esas al
+        if (expDate >= endDate) {
+            endDate = expDate;
+        }
+    }
+
+    const diffTime = endDate.getTime() - startDate.getTime();
+    let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 0 ? 1 : diffDays;
 }
 
 // --- GİRİŞ / YETKİLENDİRME İŞLEMLERİ ---
@@ -209,11 +234,15 @@ function renderCars() {
         let notesHtml = '';
 
         if(!isAvailable) {
+            const currentTotalDays = calculateTotalDays(car.rentDate, car.expectedReturnDate);
+            const currentAllowedKm = currentTotalDays * 300;
+
             rentDetails = `
                 <p><i class="fa-solid fa-user"></i> Müşteri: <strong>${car.renterName}</strong></p>
                 <p><i class="fa-solid fa-user-tie"></i> Personel: <strong>${car.employeeName}</strong></p>
                 <p><i class="fa-regular fa-calendar"></i> Çıkış: <strong>${car.rentDate}</strong></p>
-                <p><i class="fa-regular fa-calendar-check"></i> Beklenen Dönüş: <strong>${car.expectedReturnDate || '-'}</strong></p>
+                <p><i class="fa-regular fa-calendar-check"></i> Beklenen Dönüş: <strong>${car.expectedReturnDate || '-'} (${currentTotalDays} Gün)</strong></p>
+                <p><i class="fa-solid fa-route"></i> Toplam KM Limiti: <strong>${currentAllowedKm} KM</strong></p>
                 <p><i class="fa-solid fa-money-bill-wave"></i> Günlük Ücret: <strong>${car.dailyPrice} ₺</strong></p>
             `;
             if (car.notes) {
@@ -235,7 +264,7 @@ function renderCars() {
             : '';
 
         let editRentalBtn = !isAvailable 
-            ? `<button class="btn-primary" onclick="openEditRentalModal('${car.id}')" style="width: auto; padding: 10px 14px;" title="Kira Bilgilerini Düzenle"><i class="fa-solid fa-pen-to-square"></i></button>`
+            ? `<button class="btn-primary" onclick="openEditRentalModal('${car.id}')" style="width: auto; padding: 10px 14px;" title="Kira ve Süre Düzenle"><i class="fa-solid fa-pen-to-square"></i></button>`
             : '';
 
         card.innerHTML = `
@@ -271,7 +300,7 @@ function updateStats() {
     if (rentedCarsEl) rentedCarsEl.innerText = cars.filter(c => c.status === 'rented').length;
 }
 
-// --- AYLIK GELİR/GİDER GÖSTERME (SOL GELİR - SAĞ GİDER AYRI SÜTUN) ---
+// --- AYLIK GELİR/GİDER GÖSTERME ---
 function renderRevenue() {
     const container = document.getElementById('revenue-container');
     if (!container) return;
@@ -328,11 +357,11 @@ function renderRevenue() {
                     totalIncome += detail.amount;
                     let kmInfoText = `Toplam Yol: ${detail.distanceTraveled || 0} KM`;
                     if (detail.extraKm && detail.extraKm > 0) {
-                        kmInfoText += ` <span style="color: #fbbf24; font-weight: 700;">(⚠️ ${detail.extraKm} KM Aşım)</span>`;
+                        kmInfoText += ` <span style="color: #fbbf24; font-weight: 700;">(⚠️ ${detail.extraKm} KM Aşım, +${detail.extraKmCost || 0} ₺)</span>`;
                     } else if (detail.distanceTraveled !== undefined && detail.distanceTraveled !== '-') {
                         kmInfoText += ` <span style="color: #34d399;">(Sınır İçinde)</span>`;
                     } else {
-                        kmInfoText = 'Peşin Kiralama';
+                        kmInfoText = 'Peşin Kiralama Bedeli';
                     }
 
                     incomeHtml += `
@@ -467,7 +496,8 @@ if (addExpenseForm) {
         const desc = document.getElementById('expense-desc').value;
         const amount = parseInt(document.getElementById('expense-amount').value);
 
-        const dDate = new Date(dateStr);
+        const [dY, dM, dD] = dateStr.split('-').map(Number);
+        const dDate = new Date(dY, dM - 1, dD);
         const monthKey = `${dDate.getFullYear()}-${String(dDate.getMonth() + 1).padStart(2, '0')}`;
         
         if (!revenueData[monthKey] || typeof revenueData[monthKey] !== 'object') {
@@ -531,7 +561,7 @@ if (editKmForm) {
     });
 }
 
-// --- KİRALAMA İŞLEMİ (Not Ekleme Dahil) ---
+// --- KİRALAMA İŞLEMİ ---
 window.openRentModal = function(id) {
     const car = cars.find(c => c.id === id);
     if (!car) return;
@@ -570,14 +600,7 @@ if (rentCarForm) {
         const dailyPrice = parseInt(document.getElementById('daily-price').value);
         const notes = document.getElementById('rent-notes').value;
 
-        const rDate = new Date(rentDateStr);
-        rDate.setHours(0,0,0,0);
-        const eDate = new Date(expectedReturnStr);
-        eDate.setHours(0,0,0,0);
-
-        let plannedDays = Math.round((eDate - rDate) / (1000 * 60 * 60 * 24));
-        if (plannedDays <= 0) plannedDays = 1;
-
+        const plannedDays = calculateTotalDays(rentDateStr, expectedReturnStr);
         const initialCost = plannedDays * dailyPrice;
 
         cars[carIndex].status = 'rented';
@@ -616,14 +639,14 @@ if (rentCarForm) {
             date: today.toLocaleDateString('tr-TR')
         });
 
-        alert(`Araç başarıyla kiraya verildi!\nPlanlanan Süre: ${plannedDays} Gün\nPeşin Alınan Kiralama Ücreti: ${initialCost} ₺`);
+        alert(`Araç başarıyla kiraya verildi!\nPlanlanan Süre: ${plannedDays} Gün\nPeşin Alınan Kiralama Ücreti: ${initialCost} ₺\nToplam KM Hakkı: ${plannedDays * 300} KM`);
 
         saveData();
         if (rentModal) rentModal.style.display = 'none';
     });
 }
 
-// --- KİRA BİLGİLERİNİ DÜZENLEME (GÜN UZATMA VE EK ÜCRET DAHİL) ---
+// --- KİRA BİLGİLERİNİ DÜZENLEME (GÜN UZATMA VE LİMİT ARTTIRMA) ---
 window.openEditRentalModal = function(id) {
     const car = cars.find(c => c.id === id);
     if (!car) return;
@@ -662,11 +685,11 @@ function calculateExtensionCost() {
         return 0;
     }
 
-    const origDate = new Date(originalExpectedReturnDate);
-    origDate.setHours(0, 0, 0, 0);
+    const [oY, oM, oD] = originalExpectedReturnDate.split('-').map(Number);
+    const origDate = new Date(oY, oM - 1, oD);
 
-    const newDate = new Date(newDateStr);
-    newDate.setHours(0, 0, 0, 0);
+    const [nY, nM, nD] = newDateStr.split('-').map(Number);
+    const newDate = new Date(nY, nM - 1, nD);
 
     const diffDays = Math.round((newDate - origDate) / (1000 * 60 * 60 * 24));
 
@@ -707,10 +730,11 @@ if (editRentalForm) {
         let extraCost = 0;
 
         if (originalExpectedReturnDate && newReturnDateStr) {
-            const origDate = new Date(originalExpectedReturnDate);
-            origDate.setHours(0, 0, 0, 0);
-            const newDate = new Date(newReturnDateStr);
-            newDate.setHours(0, 0, 0, 0);
+            const [oY, oM, oD] = originalExpectedReturnDate.split('-').map(Number);
+            const origDate = new Date(oY, oM - 1, oD);
+
+            const [nY, nM, nD] = newDateStr.split('-').map(Number);
+            const newDate = new Date(nY, nM - 1, nD);
 
             extraDays = Math.round((newDate - origDate) / (1000 * 60 * 60 * 24));
             if (extraDays > 0) {
@@ -752,7 +776,8 @@ if (editRentalForm) {
                 date: today.toLocaleDateString('tr-TR')
             });
 
-            alert(`Kiralama süresi ${extraDays} gün uzatıldı!\nExtra Alınması Gereken Tutar: +${extraCost} ₺ tahsilata işlendi.`);
+            const newTotalDays = calculateTotalDays(cars[carIndex].rentDate, newReturnDateStr);
+            alert(`Kiralama süresi ${extraDays} gün uzatıldı!\nExtra Alınan Tutar: +${extraCost} ₺\nYeni Toplam KM Limiti: ${newTotalDays * 300} KM oldu.`);
         } else {
             alert("Kiralama bilgileri güncellendi!");
         }
@@ -795,17 +820,9 @@ if (returnKmInput) {
         if (returnKm < car.startKm) return;
 
         const distanceTraveled = returnKm - car.startKm;
-        
-        const rentDate = new Date(car.rentDate);
-        rentDate.setHours(0, 0, 0, 0);
-        const today = new Date(); 
-        today.setHours(0, 0, 0, 0);
-        
-        const diffTime = today - rentDate;
-        let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays <= 0) diffDays = 1; 
+        const totalDays = calculateTotalDays(car.rentDate, car.expectedReturnDate);
+        const allowedKm = totalDays * 300;
 
-        const allowedKm = diffDays * 300;
         const form = document.getElementById('return-car-form');
         let extraKmInputContainer = document.getElementById('extra-km-price-group');
 
@@ -841,23 +858,15 @@ if (returnCarForm) {
         const carIndex = cars.findIndex(c => c.id === id);
         if (carIndex === -1) return;
         
-        if(returnKm < cars[carIndex].startKm) {
+        if (returnKm < cars[carIndex].startKm) {
             alert("Dönüş kilometresi, çıkış kilometresinden küçük olamaz!");
             return;
         }
 
         const distanceTraveled = returnKm - cars[carIndex].startKm;
-        
-        const rentDate = new Date(cars[carIndex].rentDate);
-        rentDate.setHours(0, 0, 0, 0);
-        const today = new Date(); 
-        today.setHours(0, 0, 0, 0);
-        
-        const diffTime = today - rentDate;
-        let diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays <= 0) diffDays = 1; 
+        const totalDays = calculateTotalDays(cars[carIndex].rentDate, cars[carIndex].expectedReturnDate);
+        const allowedKm = totalDays * 300;
 
-        const allowedKm = diffDays * 300;
         let extraKm = 0;
         let extraKmCost = 0;
 
@@ -866,6 +875,7 @@ if (returnCarForm) {
             extraKmCost = extraKm * extraKmPrice;
         }
 
+        const today = new Date();
         const monthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
         
         if (!revenueData[monthKey] || typeof revenueData[monthKey] !== 'object') {
@@ -882,7 +892,7 @@ if (returnCarForm) {
                 carName: `${cars[carIndex].brand} ${cars[carIndex].model}${displayPlate} (KM Aşım Bedeli)`, 
                 renter: cars[carIndex].renterName,
                 employee: currentUser,
-                days: diffDays,
+                days: totalDays,
                 distanceTraveled: distanceTraveled,
                 extraKm: extraKm,
                 extraKmCost: extraKmCost,
@@ -891,16 +901,17 @@ if (returnCarForm) {
             });
         }
 
-        let alertMessage = `Araç teslim alındı!\n\n` +
-                           `Geçirilen Süre: ${diffDays} Gün\n` +
+        let alertMessage = `Araç başarıyla teslim alındı!\n\n` +
+                           `Toplam Kiralama Süresi: ${totalDays} Gün\n` +
                            `Yapılan Toplam Yol: ${distanceTraveled} KM\n` +
-                           `Yasal KM Hakkı (${diffDays} gün x 300 KM): ${allowedKm} KM\n`;
+                           `Toplam Yasal KM Limiti (${totalDays} Gün x 300 KM): ${allowedKm} KM\n`;
 
         if (extraKm > 0) {
-            alertMessage += `⚠️ Aşım Miktarı: ${extraKm} KM\n` +
-                            `Extra KM Ücreti Tahsil Edildi: +${extraKmCost} ₺\n`;
+            alertMessage += `\n⚠️ Aşım Miktarı: ${extraKm} KM\n` +
+                            `Birim Fiyat: ${extraKmPrice} ₺/KM\n` +
+                            `Ekstra KM Ücreti: +${extraKmCost} ₺ tahsilata işlendi.\n`;
         } else {
-            alertMessage += `✅ KM aşımı yapılmamıştır, ekstra ücret alınmadı.\n`;
+            alertMessage += `\n✅ KM aşımı yapılmamıştır. Ekstra ücret alınmadı.\n`;
         }
 
         alert(alertMessage);
